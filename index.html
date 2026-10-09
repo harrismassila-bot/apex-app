@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APEX Analytics</title>
+<meta name="theme-color" content="#0D1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="APEX">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --fond:#0D1117; --carte:#161C24; --barre:#11161D; --trait:#2A3441; --trait2:#1E2630;
+  --texte:#E8EDF2; --doux:#9AA7B4; --clair:#C9D3DC;
+  --vert:#4FD1A5; --vert-fond:#12382B; --vert-bord:#2E6B55; --vert-encre:#06261A;
+  --ambre:#F0B450; --ambre-fond:#3A2E14; --ambre-bord:#5A4520; --ambre-encre:#2B1D04;
+  --rouge:#F29A8E; --rouge-bord:#5A2A2A;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font-family:var(--sans);-webkit-text-size-adjust:100%}
+body{min-height:100vh;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+a{color:var(--vert)}
+button,input,select{font:inherit;color:inherit}
+.app{max-width:560px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px 24px}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 14px}
+.marque{display:flex;align-items:baseline;gap:8px}
+.marque b{font-size:22px;letter-spacing:.08em}
+.marque span{font-size:12px;color:var(--doux)}
+.pastille{font-family:var(--mono);font-size:11px;color:var(--ambre);border:1px solid var(--ambre-bord);border-radius:6px;padding:4px 8px}
+h1{font-size:18px;font-weight:600;margin:4px 0 14px}
+h2{margin:0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--doux)}
+.carte{background:var(--carte);border:1px solid var(--trait);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.pile{display:flex;flex-direction:column;gap:12px}
+.ligne{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.grille2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.doux{color:var(--doux)} .petit{font-size:12px} .mono{font-family:var(--mono)}
+label.champ{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--doux)}
+input:not([type=checkbox]):not([type=file]),select{
+  min-height:46px;padding:0 12px;border-radius:10px;border:1px solid var(--trait);background:var(--carte);color:var(--texte);font-size:16px;width:100%}
+input.chiffre{font-family:var(--mono);text-align:center;padding:0 6px;min-height:44px}
+input:focus,select:focus{outline:2px solid var(--vert);outline-offset:1px}
+.bouton{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:12px;border:0;background:var(--vert);color:var(--vert-encre);font-weight:600;font-size:16px;width:100%;cursor:pointer;text-decoration:none}
+.bouton.second{background:transparent;color:var(--texte);border:1px solid var(--trait)}
+.bouton.petit{min-height:40px;font-size:14px;width:auto;padding:0 14px}
+.bouton:disabled{opacity:.4}
+.coche{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-size:15px;border-bottom:1px solid var(--trait)}
+.coche:last-child{border-bottom:0}
+.coche input{width:22px;height:22px;accent-color:var(--vert)}
+.badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:6px;white-space:nowrap}
+.b-BET{background:var(--vert);color:var(--vert-encre)}
+.b-SECURISE{background:var(--ambre);color:var(--ambre-encre)}
+.b-NOBET{border:1px solid var(--trait);color:var(--doux)}
+.b-INFO{border:1px solid var(--trait);color:var(--clair)}
+.b-ATTENTE{border:1px dashed #4A5868;color:var(--clair)}
+.portes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;font-family:var(--mono);font-size:12px;text-align:center}
+.portes span{padding:6px 0;border-radius:6px;border:1px solid var(--trait);color:var(--doux)}
+.portes .ok{background:var(--vert-fond);border-color:var(--vert-fond);color:var(--vert)}
+.portes .ko{background:var(--ambre-fond);border-color:var(--ambre-fond);color:var(--ambre)}
+.alerte{background:#1D1810;border:1px solid var(--ambre-bord);border-radius:12px;padding:12px 14px;font-size:13px;color:#F3D39A;margin-bottom:12px;display:flex;flex-direction:column;gap:6px}
+table.att{width:100%;border-collapse:collapse;font-size:14px}
+table.att th{font-weight:500;color:var(--doux);font-size:12px;text-align:right;padding:6px 0}
+table.att th:first-child,table.att td:first-child{text-align:left}
+table.att td{padding:7px 0;border-top:1px solid var(--trait2);text-align:right;font-family:var(--mono)}
+table.att td:first-child{font-family:var(--sans)}
+.marche{border-radius:14px}
+.marche.candidat{border-color:var(--vert-bord)}
+.marche.bloque{opacity:.55}
+.marche h3{margin:0;font-size:15px;font-weight:600}
+.pas{display:flex;align-items:center;gap:6px}
+.pas button{width:40px;height:40px;border-radius:10px;border:1px solid var(--trait);background:transparent;font-size:18px}
+.pas .val{font-family:var(--mono);min-width:44px;text-align:center}
+.issue{display:grid;grid-template-columns:1fr 96px;gap:4px 12px;padding-top:12px;border-top:1px solid var(--trait2)}
+.issue .nom{font-size:14px}
+.issue .proba{font-family:var(--mono);font-size:24px;font-weight:500}
+.issue .mini{font-size:12px;color:var(--doux)}
+.issue .verdict{grid-column:1 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--clair)}
+.issue .verdict .enreg{margin-left:auto}
+.onglets{position:fixed;left:0;right:0;bottom:0;background:var(--barre);border-top:1px solid var(--trait);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.onglets button{min-height:62px;border:0;background:transparent;color:var(--doux);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.onglets button[aria-current=page]{color:var(--vert)}
+.kpi{display:flex;flex-direction:column;gap:6px}
+.kpi .v{font-family:var(--mono);font-size:22px;font-weight:500}
+.liste-eq{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px}
+.pari{display:flex;flex-direction:column;gap:10px}
+.cache{display:none!important}
+.vide{text-align:center;color:var(--doux);font-size:14px;padding:24px 8px}
+.stats-match{display:grid;grid-template-columns:1fr 84px 84px;gap:8px;align-items:center;font-size:14px}
+.erreur{color:var(--rouge);font-size:13px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div class="marque"><b>APEX</b><span>Analytics</span></div>
+    <span class="pastille" title="Aucun argent réel tant que le feu vert n'est pas donné">MODE PAPIER</span>
+  </header>
+  <main id="vue" aria-live="polite"></main>
+</div>
+
+<nav class="onglets" aria-label="Navigation principale">
+  <button type="button" data-vue="accueil">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+  <button type="button" data-vue="analyser">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Analyser</button>
+  <button type="button" data-vue="recents">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Matchs récents</button>
+  <button type="button" data-vue="journal">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M9 11h7M9 15h7"/></svg>Journal</button>
+</nav>
+
+<script src="moteur.js"></script>
+<script>
+"use strict";
+const M = window.ApexMoteur;
+const P0_JOURS = 21;          // une équipe sans match connu depuis plus de 21 jours bloque la porte P0
+const SEUIL_PAUSE = 0.15;     // pause automatique si drawdown > 15 %
+
+// ------------------------------------------------------------ stockage local (ton téléphone)
+const store = {
+  lire(cle, defaut) { try { const v = localStorage.getItem("apex." + cle); return v ? JSON.parse(v) : defaut; } catch (e) { return defaut; } },
+  ecrire(cle, val) { try { localStorage.setItem("apex." + cle, JSON.stringify(val)); return true; } catch (e) { alert("Impossible d'enregistrer sur ce téléphone (mémoire pleine ou navigation privée)."); return false; } },
+};
+const etat = {
+  vue: store.lire("vue", "accueil"),
+  index: null, donnees: {}, erreur: null,
+  manuels: store.lire("manuels", []),
+  journal: store.lire("journal", []),
+  bankroll: store.lire("bankroll", 100000),
+  choix: store.lire("choix", { code: "SP1", dom: "", ext: "", date: "", ctx: {} }),
+  analyse: null, lignes: {},
+};
+
+// ------------------------------------------------------------ utilitaires
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = p => (100 * p).toFixed(1).replace(".", ",") + " %";
+const nb = (x, d = 2) => Number(x).toFixed(d).replace(".", ",");
+const aujourdhui = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+const jours = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+const dateFr = iso => iso ? iso.split("-").reverse().join("/") : "—";
+const lireCote = v => { const x = parseFloat(String(v).replace(",", ".")); return isFinite(x) && x > 1 ? x : null; };
+const xof = x => Math.round(x).toLocaleString("fr-FR") + " XOF";
+const NOMS_LIGUES = { SP1: "Liga", E0: "Premier League", I1: "Serie A", D1: "Bundesliga", F1: "Ligue 1" };
+
+async function chargerIndex() {
+  try {
+    const r = await fetch("data/index.json", { cache: "no-cache" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    etat.index = await r.json();
+  } catch (e) { etat.erreur = "Données introuvables (" + e.message + "). Lance l'export dans GitHub."; }
+}
+async function chargerLigue(code) {
+  if (etat.donnees[code]) return etat.donnees[code];
+  const r = await fetch("data/forces_" + code + ".json", { cache: "no-cache" });
+  if (!r.ok) throw new Error("données " + code + " introuvables");
+  return (etat.donnees[code] = await r.json());
+}
+
+// ------------------------------------------------------------ journal : indicateurs
+function bilanJournal() {
+  const bets = etat.journal.filter(p => p.verdict === "BET");
+  const resolus = bets.filter(p => p.resultat);
+  let mises = 0, gain = 0, capital = etat.bankroll, pic = capital, ddMax = 0;
+  const ordre = [...resolus].sort((a, b) => (a.dateMatch || "").localeCompare(b.dateMatch || ""));
+  for (const p of ordre) {
+    const g = p.resultat === "gagne" ? p.cote - 1 : p.resultat === "perdu" ? -1 : 0;
+    mises += 1; gain += g;
+    capital += (p.mise || 0) * g;
+    pic = Math.max(pic, capital);
+    ddMax = Math.max(ddMax, (pic - capital) / pic);
+  }
+  const avecClot = bets.filter(p => p.cloture);
+  const clv = avecClot.length ? avecClot.reduce((s, p) => s + (p.cote / p.cloture - 1), 0) / avecClot.length : null;
+  const ddActuel = pic > 0 ? (pic - capital) / pic : 0;
+  return { total: etat.journal.length, bets: bets.length, resolus: resolus.length,
+           roi: mises ? gain / mises : null, clv, ddMax, ddActuel, capital, pause: ddActuel > SEUIL_PAUSE };
+}
+
+// ------------------------------------------------------------ navigation
+function aller(vue) {
+  etat.vue = vue; store.ecrire("vue", vue);
+  document.querySelectorAll(".onglets button").forEach(b => { if (b.dataset.vue === vue) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  rendre();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll(".onglets button").forEach(b => b.addEventListener("click", () => aller(b.dataset.vue)));
+
+function rendre() {
+  const v = document.getElementById("vue");
+  if (etat.erreur) { v.innerHTML = `<div class="alerte">${esc(etat.erreur)}</div>`; return; }
+  if (!etat.index) { v.innerHTML = `<div class="vide">Chargement des données…</div>`; return; }
+  ({ accueil: vueAccueil, analyser: vueAnalyser, recents: vueRecents, journal: vueJournal }[etat.vue] || vueAccueil)(v);
+}
+
+// ------------------------------------------------------------ vue : accueil
+function vueAccueil(v) {
+  const b = bilanJournal();
+  const ligues = etat.index.ligues.map(l => {
+    const retard = jours(l.dernier_match, aujourdhui());
+    return `<div class="ligne"><span>${esc(l.ligue)}${l.teste ? "" : ' <span class="doux petit">· non testée</span>'}</span>
+      <span class="mono ${retard > 14 ? "" : "doux"}" style="${retard > 14 ? "color:var(--ambre)" : ""}">jusqu'au ${dateFr(l.dernier_match)}</span></div>`;
+  }).join("");
+  v.innerHTML = `
+    <button class="bouton" type="button" id="go">Nouvelle analyse</button>
+    <div style="height:16px"></div>
+    <section class="carte pile"><div class="ligne"><h2>Données</h2><span class="petit doux">mise à jour mardi et vendredi</span></div>${ligues}
+      <p class="petit doux" style="margin:0">Source : football-data.co.uk. Si une équipe a joué depuis la date affichée, ajoute ce match dans « Matchs récents ».</p></section>
+    <section class="grille2">
+      <div class="carte kpi"><span class="petit doux">Paris BET (papier)</span><span class="v">${b.bets}<span class="doux" style="font-size:14px"> / 200</span></span></div>
+      <div class="carte kpi"><span class="petit doux">CLV moyen</span><span class="v">${b.clv === null ? "—" : (b.clv >= 0 ? "+" : "") + nb(100 * b.clv, 1) + " %"}</span></div>
+    </section>
+    <section class="carte pile"><h2>Règles du jeu</h2>
+      <p class="petit" style="margin:0;color:var(--clair)">BET seulement si les 5 portes passent : données fraîches, famille calibrée, contexte sain, edge ≥ 5 %, mise ≤ 3 % de la bankroll (quart de Kelly). Les verdicts restent en papier tant que le journal n'a pas validé 200 paris.</p></section>`;
+  v.querySelector("#go").onclick = () => aller("analyser");
+}
+
+// ------------------------------------------------------------ vue : analyser
+const MARCHES = [
+  // famille, statistique, côté, ligne par défaut, libellé
+  { id: "be-dom", fam: "Buts équipe", stat: "buts", cote: "dom", ligne: 1.5, nom: e => `${e.dom} : buts` },
+  { id: "be-ext", fam: "Buts équipe", stat: "buts", cote: "ext", ligne: 0.5, nom: e => `${e.ext} : buts` },
+  { id: "co-tot", fam: "Corners", stat: "corners", cote: "total", ligne: 9.5, nom: () => "Corners du match" },
+  { id: "tc-dom", fam: "Tirs cadrés", stat: "cadres", cote: "dom", ligne: 4.5, nom: e => `${e.dom} : tirs cadrés` },
+  { id: "tc-ext", fam: "Tirs cadrés", stat: "cadres", cote: "ext", ligne: 3.5, nom: e => `${e.ext} : tirs cadrés` },
+  { id: "ti-dom", fam: "Tirs", stat: "tirs", cote: "dom", ligne: 12.5, nom: e => `${e.dom} : tirs` },
+  { id: "ti-ext", fam: "Tirs", stat: "tirs", cote: "ext", ligne: 10.5, nom: e => `${e.ext} : tirs` },
+  { id: "bu-tot", fam: "Buts", stat: "buts", cote: "total", ligne: 2.5, nom: () => "Buts du match" },
+  { id: "ca-tot", fam: "Cartons", stat: "cartons", cote: "total", ligne: 4.5, nom: () => "Cartons du match" },
+];
+
+function vueAnalyser(v) {
+  const c = etat.choix;
+  if (!c.date) c.date = aujourdhui();
+  const options = etat.index.ligues.map(l => `<option value="${l.code}" ${l.code === c.code ? "selected" : ""}>${esc(l.ligue)}</option>`).join("");
+  v.innerHTML = `
+    <h1>Analyser un match</h1>
+    <div class="pile">
+      <label class="champ">Compétition<select id="f-ligue">${options}</select></label>
+      <label class="champ">Domicile<select id="f-dom"><option>Chargement…</option></select></label>
+      <label class="champ">Extérieur<select id="f-ext"><option>Chargement…</option></select></label>
+      <label class="champ">Date du match<input type="date" id="f-date" value="${esc(c.date)}"></label>
+      <section class="carte" style="padding:0 14px;margin:0" aria-label="Contexte">
+        ${[["absent", "Absent important (titulaire clé)"], ["fatigue", "Match dans les 72 h (avant ou après)"], ["derby", "Derby ou match à forte tension"], ["coach", "Nouvel entraîneur cette saison"]]
+          .map(([k, t]) => `<label class="coche">${t}<input type="checkbox" data-ctx="${k}" ${c.ctx[k] ? "checked" : ""}></label>`).join("")}
+      </section>
+      <button class="bouton" type="button" id="f-go">Lancer l'analyse</button>
+      <p class="erreur cache" id="f-err"></p>
+    </div>
+    <div id="resultat" style="margin-top:20px"></div>`;
+  const sel = (id) => v.querySelector(id);
+  const remplir = async () => {
+    try {
+      const d = await chargerLigue(sel("#f-ligue").value);
+      const eqs = Object.keys(d.equipes).sort((a, b) => a.localeCompare(b));
+      const opts = (choisi) => `<option value="">— choisir —</option>` + eqs.map(e => `<option ${e === choisi ? "selected" : ""}>${esc(e)}</option>`).join("");
+      sel("#f-dom").innerHTML = opts(c.dom); sel("#f-ext").innerHTML = opts(c.ext);
+    } catch (e) { sel("#f-err").textContent = e.message; sel("#f-err").classList.remove("cache"); }
+  };
+  sel("#f-ligue").onchange = () => { c.code = sel("#f-ligue").value; c.dom = c.ext = ""; remplir(); };
+  remplir();
+  v.querySelectorAll("[data-ctx]").forEach(x => x.onchange = () => { c.ctx[x.dataset.ctx] = x.checked; store.ecrire("choix", c); });
+  sel("#f-go").onclick = async () => {
+    c.code = sel("#f-ligue").value; c.dom = sel("#f-dom").value; c.ext = sel("#f-ext").value; c.date = sel("#f-date").value || aujourdhui();
+    store.ecrire("choix", c);
+    const err = sel("#f-err");
+    if (!c.dom || !c.ext || c.dom === c.ext) { err.textContent = "Choisis deux équipes différentes."; err.classList.remove("cache"); return; }
+    err.classList.add("cache");
+    const d = await chargerLigue(c.code);
+    const manuels = etat.manuels.filter(m => m.code === c.code);
+    const a = M.analyser(d, manuels, c.dom, c.ext, c.date);
+    etat.analyse = { a, d, choix: { ...c, ctx: { ...c.ctx } }, manuels };
+    etat.lignes = {};
+    rendreResultat();
+    document.getElementById("resultat").scrollIntoView({ behavior: "smooth" });
+  };
+  if (etat.analyse && etat.analyse.choix.code === c.code) rendreResultat();
+}
+
+function porteP0(an) {
+  const dernier = (eq) => {
+    let d = an.d.dernier_match_equipe[eq] || null;
+    for (const m of an.manuels) if ((m.dom === eq || m.ext === eq) && (!d || m.date > d)) d = m.date;
+    return d;
+  };
+  const res = [an.choix.dom, an.choix.ext].map(eq => ({ eq, date: dernier(eq) }));
+  const ko = res.filter(r => !r.date || jours(r.date, an.choix.date) > P0_JOURS);
+  return { ok: ko.length === 0, equipes: res,
+           raison: ko.length ? "données de " + ko.map(r => r.eq).join(" et ") + " trop anciennes : ajoute leurs derniers matchs" : "" };
+}
+
+function rendreResultat() {
+  const zone = document.getElementById("resultat");
+  if (!zone || !etat.analyse) return;
+  const { a, d, choix } = etat.analyse;
+  if (!a) { zone.innerHTML = `<div class="alerte">Pas assez de données pour ce match.</div>`; return; }
+  const p0 = porteP0(etat.analyse);
+  const ctx = Object.values(choix.ctx).some(Boolean);
+  const b = bilanJournal();
+  const att = a.attendus;
+  const ligneAtt = (nom, s) => att[s] ? `<tr><td>${nom}</td><td>${nb(att[s].dom)}</td><td>${nb(att[s].ext)}</td></tr>` : "";
+  const alertes = [];
+  if (!p0.ok) alertes.push("Porte P0 fermée : " + p0.raison + ".");
+  if (!d.teste) alertes.push("Ligue pas encore testée : aucun verdict BET possible.");
+  if (ctx) alertes.push("Contexte à risque coché : un BET est rétrogradé (SÉCURISÉ ou NO BET).");
+  if (b.pause) alertes.push("Drawdown supérieur à 15 % : pause automatique, mise à zéro.");
+  zone.innerHTML = `
+    <div class="carte pile">
+      <div><h1 style="margin:0">${esc(choix.dom)} – ${esc(choix.ext)}</h1>
+        <span class="petit doux">${esc(d.ligue)} · ${dateFr(choix.date)} · données jusqu'au ${dateFr(d.dernier_match)}</span></div>
+      <div class="portes" aria-label="Portes de décision">
+        <span class="${p0.ok ? "ok" : "ko"}">P0 ${p0.ok ? "✓" : "!"}</span>
+        <span class="${d.teste ? "ok" : "ko"}">P1 ${d.teste ? "✓" : "!"}</span>
+        <span class="${ctx ? "ko" : "ok"}">P2 ${ctx ? "!" : "✓"}</span>
+        <span>P3</span><span>P4</span>
+      </div>
+      <div class="liste-eq petit">${p0.equipes.map(r => `<span>Dernier match connu · ${esc(r.eq)}</span><span class="mono">${dateFr(r.date)}</span>`).join("")}</div>
+    </div>
+    ${alertes.length ? `<div class="alerte">${alertes.map(esc).map(t => `<span>${t}</span>`).join("")}</div>` : ""}
+    <div class="carte"><h2 style="margin-bottom:6px">Valeurs attendues</h2>
+      <table class="att"><thead><tr><th></th><th>${esc(choix.dom)}</th><th>${esc(choix.ext)}</th></tr></thead><tbody>
+      ${ligneAtt("Buts", "buts")}${ligneAtt("Tirs cadrés", "cadres")}${ligneAtt("Tirs", "tirs")}${ligneAtt("Corners", "corners")}${ligneAtt("Cartons", "cartons")}
+      </tbody></table></div>
+    <div id="marches"></div>
+    <p class="petit doux">Cote mini = 1 ÷ probabilité. En dessous, le pari perd de l'argent sur la durée. Saisis la cote Betclic pour obtenir l'edge et le verdict.</p>`;
+  rendreMarches(p0, ctx, b);
+}
+
+function rendreMarches(p0, ctx, b) {
+  const { a, d, choix } = etat.analyse;
+  const ordre = { candidat: 0, info: 1, bloque: 2 };
+  const statut = fam => d.statut[fam] || "bloque";
+  const cartes = [];
+  // marchés à ligne (plus / moins)
+  for (const mk of MARCHES) {
+    if (!a.attendus[mk.stat]) continue;
+    const ligne = etat.lignes[mk.id] ?? mk.ligne;
+    const pPlus = a.plus(mk.fam, mk.stat, mk.cote, ligne);
+    if (pPlus === null) continue;
+    cartes.push({ ordre: ordre[statut(mk.fam)], html: carteMarche(mk.id, mk.fam, mk.nom(choix), statut(mk.fam), ligne,
+      [{ cle: "plus", nom: `Plus de ${nb(ligne, 1)}`, p: pPlus }, { cle: "moins", nom: `Moins de ${nb(ligne, 1)}`, p: 1 - pPlus }]) });
+  }
+  cartes.push({ ordre: ordre[statut("1N2")], html: carteMarche("1n2", "1N2", "Résultat (1N2)", statut("1N2"), null,
+    [{ cle: "1", nom: `1 · ${choix.dom}`, p: a.prob1n2["1"] }, { cle: "N", nom: "N · Nul", p: a.prob1n2["N"] }, { cle: "2", nom: `2 · ${choix.ext}`, p: a.prob1n2["2"] }]) });
+  cartes.push({ ordre: ordre[statut("Double chance")], html: carteMarche("dc", "Double chance", "Double chance", statut("Double chance"), null,
+    [{ cle: "1N", nom: "1N", p: a.probDC["1N"] }, { cle: "N2", nom: "N2", p: a.probDC["N2"] }, { cle: "12", nom: "12", p: a.probDC["12"] }]) });
+  cartes.push({ ordre: ordre[statut("Buts")], html: carteMarche("btts", "Buts", "Les deux équipes marquent", statut("Buts"), null,
+    [{ cle: "oui", nom: "Oui", p: a.probBTTS }, { cle: "non", nom: "Non", p: 1 - a.probBTTS }]) });
+  cartes.sort((x, y) => x.ordre - y.ordre);
+  const zone = document.getElementById("marches");
+  zone.innerHTML = cartes.map(c => c.html).join("");
+  // interactions
+  zone.querySelectorAll("[data-pas]").forEach(btn => btn.onclick = () => {
+    const id = btn.dataset.id, mk = MARCHES.find(m => m.id === id);
+    const cur = etat.lignes[id] ?? mk.ligne;
+    etat.lignes[id] = Math.max(0.5, cur + Number(btn.dataset.pas));
+    rendreMarches(p0, ctx, b);
+  });
+  zone.querySelectorAll("input[data-cote]").forEach(inp => {
+    const maj = () => majVerdict(inp, p0, ctx, b);
+    inp.oninput = maj; maj();
+  });
+  zone.querySelectorAll("button[data-enreg]").forEach(btn => btn.onclick = () => enregistrer(btn));
+}
+
+function carteMarche(id, fam, titre, statut, ligne, issues) {
+  const etiquette = { candidat: "", info: '<span class="badge b-INFO">INFO</span>', bloque: '<span class="badge b-NOBET">BLOQUÉ</span>' }[statut];
+  const pas = ligne === null ? "" : `<div class="pas"><button type="button" data-pas="-1" data-id="${id}" aria-label="Ligne moins 1">−</button><span class="val">${nb(ligne, 1)}</span><button type="button" data-pas="1" data-id="${id}" aria-label="Ligne plus 1">+</button></div>`;
+  return `<article class="carte marche ${statut} pile">
+    <div class="ligne"><h3>${esc(titre)}</h3>${etiquette}${pas}</div>
+    <span class="petit doux">${esc(fam)}${statut === "candidat" ? " · famille calibrée" : statut === "info" ? " · le marché prévoit mieux" : " · non calibrée"}</span>
+    ${issues.map(is => `
+      <div class="issue" data-carte="${id}">
+        <div><div class="nom">${esc(is.nom)}</div><div class="proba">${pct(is.p)}</div><div class="mini">cote mini ${is.p > 0.01 ? nb(1 / is.p) : "—"}</div></div>
+        <label class="champ" style="font-size:11px">Cote Betclic<input class="chiffre" inputmode="decimal" placeholder="ex. 1,85" data-cote data-p="${is.p}" data-statut="${statut}" data-fam="${esc(fam)}" data-libelle="${esc(titre + " · " + is.nom)}"></label>
+        <div class="verdict"><span class="badge"></span><span class="raison"></span><button type="button" class="bouton second petit enreg cache" data-enreg>Enregistrer</button></div>
+      </div>`).join("")}
+  </article>`;
+}
+
+function majVerdict(inp, p0, ctx, b) {
+  const bloc = inp.closest(".issue");
+  const cote = lireCote(inp.value);
+  const r = M.verdict({ p: Number(inp.dataset.p), cote, statut: inp.dataset.statut, p0: p0.ok, p0raison: p0.raison,
+                        contexte: ctx, bankroll: b.capital, pause: b.pause });
+  const badge = bloc.querySelector(".badge");
+  badge.className = "badge b-" + r.code;
+  badge.textContent = { BET: "BET", SECURISE: "SÉCURISÉ", NOBET: "NO BET", INFO: "INFO", ATTENTE: "COTE ?" }[r.code];
+  bloc.querySelector(".raison").textContent = r.raison + (r.code === "BET" ? ` · mise ${xof(r.mise)}` : "");
+  const btn = bloc.querySelector("[data-enreg]");
+  btn.classList.toggle("cache", !cote);
+  btn._verdict = r; btn._cote = cote; btn._inp = inp;
+}
+
+function enregistrer(btn) {
+  const { d, choix } = etat.analyse;
+  const inp = btn._inp, r = btn._verdict;
+  etat.journal.push({
+    id: Date.now().toString(36), cree: new Date().toISOString(), code: d.code, ligue: d.ligue,
+    match: `${choix.dom} – ${choix.ext}`, dateMatch: choix.date, marche: inp.dataset.libelle, famille: inp.dataset.fam,
+    p: Number(inp.dataset.p), cote: btn._cote, verdict: r.code, ev: r.ev, mise: r.mise, cloture: null, resultat: null,
+  });
+  if (store.ecrire("journal", etat.journal)) { btn.textContent = "✓ Enregistré"; btn.disabled = true; }
+}
+
+// ------------------------------------------------------------ vue : matchs récents
+function vueRecents(v) {
+  const code = etat.choix.code || "SP1";
+  const options = etat.index.ligues.map(l => `<option value="${l.code}" ${l.code === code ? "selected" : ""}>${esc(l.ligue)}</option>`).join("");
+  const champ = (id, lab) => `<span>${lab}</span><input class="chiffre" inputmode="numeric" id="m-${id}-d" aria-label="${lab} domicile"><input class="chiffre" inputmode="numeric" id="m-${id}-e" aria-label="${lab} extérieur">`;
+  v.innerHTML = `
+    <h1>Matchs récents</h1>
+    <p class="petit doux" style="margin-top:-6px">Ajoute ici les matchs joués depuis la dernière mise à jour des données (page « Statistiques » de SofaScore).</p>
+    <label class="champ">Compétition<select id="m-ligue">${options}</select></label>
+    <div style="height:12px"></div>
+    <div class="carte pile" id="m-form">
+      <label class="champ">Date<input type="date" id="m-date" value="${aujourdhui()}"></label>
+      <div class="grille2"><label class="champ">Domicile<select id="m-dom"></select></label><label class="champ">Extérieur<select id="m-ext"></select></label></div>
+      <div class="stats-match"><span class="petit doux">Statistique</span><span class="petit doux" style="text-align:center">Dom.</span><span class="petit doux" style="text-align:center">Ext.</span>
+        ${champ("buts", "Buts")}${champ("tirs", "Tirs")}${champ("cadres", "Tirs cadrés")}${champ("corners", "Corners")}${champ("jaunes", "Cartons jaunes")}${champ("rouges", "Cartons rouges")}
+        <span>xG <span class="doux petit">(si affiché)</span></span><input class="chiffre" inputmode="decimal" id="m-xg-d" aria-label="xG domicile"><input class="chiffre" inputmode="decimal" id="m-xg-e" aria-label="xG extérieur">
+      </div>
+      <p class="erreur cache" id="m-err"></p>
+      <button class="bouton" type="button" id="m-ok">Enregistrer le match</button>
+    </div>
+    <div id="m-liste"></div>
+    <div class="carte pile"><h2>Dernier match connu par équipe</h2><div class="liste-eq petit" id="m-eq"></div></div>`;
+  const q = s => v.querySelector(s);
+  const maj = async () => {
+    const c = q("#m-ligue").value; etat.choix.code = c; store.ecrire("choix", etat.choix);
+    const d = await chargerLigue(c);
+    const eqs = Object.keys(d.equipes).sort((x, y) => x.localeCompare(y));
+    const opts = `<option value="">— choisir —</option>` + eqs.map(e => `<option>${esc(e)}</option>`).join("");
+    q("#m-dom").innerHTML = opts; q("#m-ext").innerHTML = opts;
+    const miens = etat.manuels.filter(m => m.code === c).sort((x, y) => y.date.localeCompare(x.date));
+    q("#m-liste").innerHTML = miens.length ? `<div class="carte pile"><h2>Tes matchs saisis</h2>${miens.map(m => `
+      <div class="ligne"><span><span class="mono doux">${dateFr(m.date)}</span> ${esc(m.dom)} ${m.v.buts[0]}-${m.v.buts[1]} ${esc(m.ext)}</span>
+      <button type="button" class="bouton second petit" data-suppr="${m.id}" aria-label="Supprimer ce match">Suppr.</button></div>`).join("")}</div>` : "";
+    q("#m-liste").querySelectorAll("[data-suppr]").forEach(b => b.onclick = () => {
+      if (!confirm("Supprimer ce match ?")) return;
+      etat.manuels = etat.manuels.filter(m => m.id !== b.dataset.suppr); store.ecrire("manuels", etat.manuels); etat.analyse = null; maj();
+    });
+    const dernier = eq => { let x = d.dernier_match_equipe[eq]; for (const m of miens) if ((m.dom === eq || m.ext === eq) && m.date > (x || "")) x = m.date; return x; };
+    q("#m-eq").innerHTML = eqs.map(e => { const dd = dernier(e), j = dd ? jours(dd, aujourdhui()) : null;
+      return `<span>${esc(e)}</span><span class="mono" style="color:${j !== null && j > 10 ? "var(--ambre)" : "var(--doux)"}">${dateFr(dd)}${j !== null ? " · " + j + " j" : ""}</span>`; }).join("");
+  };
+  q("#m-ligue").onchange = maj; maj();
+  q("#m-ok").onclick = () => {
+    const err = q("#m-err"); err.classList.add("cache");
+    const lire = (id, dec) => { const s = q("#m-" + id).value.trim().replace(",", "."); if (s === "") return null; const x = Number(s); return isFinite(x) && x >= 0 && (dec || Number.isInteger(x)) ? x : NaN; };
+    const paire = (id, dec) => [lire(id + "-d", dec), lire(id + "-e", dec)];
+    const dom = q("#m-dom").value, ext = q("#m-ext").value, date = q("#m-date").value;
+    const v2 = { buts: paire("buts"), tirs: paire("tirs"), cadres: paire("cadres"), corners: paire("corners") };
+    const jaunes = paire("jaunes"), rouges = paire("rouges"), xg = paire("xg", true);
+    const fautes = [];
+    if (!dom || !ext || dom === ext) fautes.push("choisis deux équipes différentes");
+    if (!date || date > aujourdhui()) fautes.push("date invalide (match pas encore joué ?)");
+    for (const [k, [h, a]] of Object.entries({ ...v2, jaunes, rouges, xg })) if (Number.isNaN(h) || Number.isNaN(a)) fautes.push(k + " : nombre invalide");
+    if (v2.buts[0] === null || v2.buts[1] === null) fautes.push("le score est obligatoire");
+    for (let i = 0; i < 2; i++) if (v2.cadres[i] !== null && v2.tirs[i] !== null && v2.cadres[i] > v2.tirs[i]) fautes.push("plus de tirs cadrés que de tirs");
+    if (fautes.length) { err.textContent = "À corriger : " + [...new Set(fautes)].join(", ") + "."; err.classList.remove("cache"); return; }
+    const stats = {};
+    for (const [k, [h, a]] of Object.entries(v2)) if (h !== null && a !== null) stats[k] = [h, a];
+    if (jaunes[0] !== null && jaunes[1] !== null) stats.cartons = [jaunes[0] + (rouges[0] || 0), jaunes[1] + (rouges[1] || 0)];
+    if (xg[0] !== null && xg[1] !== null) stats.xg = xg;
+    etat.manuels.push({ id: Date.now().toString(36), code: q("#m-ligue").value, date, dom, ext, v: stats });
+    store.ecrire("manuels", etat.manuels); etat.analyse = null;
+    vueRecents(v);
+  };
+}
+
+// ------------------------------------------------------------ vue : journal
+function vueJournal(v) {
+  const b = bilanJournal();
+  const coche = (ok, txt, val) => `<li class="ligne"><span>${ok ? "✅" : "⬜"} ${txt}</span><span class="mono doux">${val}</span></li>`;
+  const feu = b.resolus >= 200 && b.clv !== null && b.clv > 0 && b.roi !== null && b.roi > 0 && b.ddMax < 0.15;
+  const entrees = [...etat.journal].sort((x, y) => (y.dateMatch || "").localeCompare(x.dateMatch || "") || y.cree.localeCompare(x.cree));
+  v.innerHTML = `
+    <h1>Journal papier</h1>
+    <section class="grille2">
+      <div class="carte kpi"><span class="petit doux">BET résolus</span><span class="v">${b.resolus}<span class="doux" style="font-size:14px"> / 200</span></span></div>
+      <div class="carte kpi"><span class="petit doux">CLV moyen</span><span class="v">${b.clv === null ? "—" : (b.clv >= 0 ? "+" : "") + nb(100 * b.clv, 1) + " %"}</span></div>
+      <div class="carte kpi"><span class="petit doux">ROI (BET)</span><span class="v">${b.roi === null ? "—" : (b.roi >= 0 ? "+" : "") + nb(100 * b.roi, 1) + " %"}</span></div>
+      <div class="carte kpi"><span class="petit doux">Drawdown max</span><span class="v">${nb(100 * b.ddMax, 1)} %</span></div>
+    </section>
+    <section class="carte pile">
+      <div class="ligne"><h2>Feu vert argent réel</h2><span class="badge ${feu ? "b-BET" : "b-SECURISE"}">${feu ? "ATTEINT" : "PAS ENCORE"}</span></div>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14px">
+        ${coche(b.resolus >= 200, "Au moins 200 BET résolus", b.resolus + " / 200")}
+        ${coche(b.clv !== null && b.clv > 0, "CLV moyen positif", b.clv === null ? "—" : nb(100 * b.clv, 1) + " %")}
+        ${coche(b.roi !== null && b.roi > 0, "ROI positif", b.roi === null ? "—" : nb(100 * b.roi, 1) + " %")}
+        ${coche(b.ddMax < 0.15, "Drawdown max sous 15 %", nb(100 * b.ddMax, 1) + " %")}
+      </ul>
+    </section>
+    <section class="carte pile">
+      <label class="champ">Bankroll papier de départ (XOF)<input class="chiffre" inputmode="numeric" id="j-bk" value="${etat.bankroll}"></label>
+      <div class="ligne petit"><span class="doux">Capital papier actuel</span><span class="mono">${xof(b.capital)}</span></div>
+      <div class="grille2"><button type="button" class="bouton second petit" id="j-exp">Sauvegarder</button><label class="bouton second petit" style="cursor:pointer">Restaurer<input type="file" accept="application/json" id="j-imp" class="cache"></label></div>
+    </section>
+    <h2 style="margin:18px 0 10px">Paris enregistrés (${entrees.length})</h2>
+    ${entrees.length ? entrees.map(p => `
+      <article class="carte pari" data-id="${p.id}">
+        <div class="ligne"><b>${esc(p.match)}</b><span class="badge b-${p.verdict}">${{ BET: "BET", SECURISE: "SÉCURISÉ", NOBET: "NO BET", INFO: "INFO", ATTENTE: "—" }[p.verdict] || p.verdict}</span></div>
+        <span class="petit" style="color:var(--clair)">${esc(p.marche)} · prob. ${pct(p.p)} · prise à <span class="mono">${nb(p.cote)}</span>${p.mise ? " · mise " + xof(p.mise) : ""}</span>
+        <span class="petit doux">${esc(p.ligue)} · ${dateFr(p.dateMatch)}${p.cloture ? ` · CLV <span class="mono">${(p.cote / p.cloture - 1 >= 0 ? "+" : "") + nb(100 * (p.cote / p.cloture - 1), 1)} %</span>` : ""}</span>
+        <div class="grille2">
+          <label class="champ" style="font-size:11px">Cote de clôture<input class="chiffre" inputmode="decimal" data-clot value="${p.cloture ? nb(p.cloture) : ""}" placeholder="juste avant le match"></label>
+          <label class="champ" style="font-size:11px">Résultat<select data-res><option value="">—</option><option value="gagne" ${p.resultat === "gagne" ? "selected" : ""}>Gagné</option><option value="perdu" ${p.resultat === "perdu" ? "selected" : ""}>Perdu</option><option value="rembourse" ${p.resultat === "rembourse" ? "selected" : ""}>Remboursé</option></select></label>
+        </div>
+        <button type="button" class="bouton second petit" data-del style="align-self:flex-end">Supprimer</button>
+      </article>`).join("") : `<div class="vide">Aucun pari pour l'instant. Analyse un match, saisis la cote Betclic, puis « Enregistrer ».</div>`}`;
+  const q = s => v.querySelector(s);
+  q("#j-bk").onchange = () => { const x = Number(q("#j-bk").value.replace(/\s/g, "")); if (x > 0) { etat.bankroll = x; store.ecrire("bankroll", x); vueJournal(v); } };
+  q("#j-exp").onclick = () => {
+    const blob = new Blob([JSON.stringify({ version: 1, journal: etat.journal, manuels: etat.manuels, bankroll: etat.bankroll }, null, 1)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "apex-sauvegarde-" + aujourdhui() + ".json"; a.click();
+  };
+  q("#j-imp").onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try { const s = JSON.parse(await f.text());
+      if (!Array.isArray(s.journal)) throw new Error();
+      if (!confirm("Remplacer ton journal actuel par cette sauvegarde ?")) return;
+      etat.journal = s.journal; etat.manuels = s.manuels || []; etat.bankroll = s.bankroll || etat.bankroll;
+      store.ecrire("journal", etat.journal); store.ecrire("manuels", etat.manuels); store.ecrire("bankroll", etat.bankroll); vueJournal(v);
+    } catch (_) { alert("Fichier de sauvegarde illisible."); }
+  };
+  v.querySelectorAll(".pari").forEach(art => {
+    const p = etat.journal.find(x => x.id === art.dataset.id);
+    art.querySelector("[data-clot]").onchange = e => { p.cloture = lireCote(e.target.value); store.ecrire("journal", etat.journal); vueJournal(v); };
+    art.querySelector("[data-res]").onchange = e => { p.resultat = e.target.value || null; store.ecrire("journal", etat.journal); vueJournal(v); };
+    art.querySelector("[data-del]").onclick = () => { if (confirm("Supprimer ce pari du journal ?")) { etat.journal = etat.journal.filter(x => x.id !== p.id); store.ecrire("journal", etat.journal); vueJournal(v); } };
+  });
+}
+
+// ------------------------------------------------------------ démarrage
+(async () => {
+  aller(etat.vue);
+  await chargerIndex();
+  rendre();
+})();
+</script>
+</body>
+</html>
