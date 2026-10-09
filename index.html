@@ -374,7 +374,7 @@ function carteMarche(id, fam, titre, statut, ligne, issues) {
   const pas = ligne === null ? "" : `<div class="pas"><button type="button" data-pas="-1" data-id="${id}" aria-label="Ligne moins 1">−</button><span class="val">${nb(ligne, 1)}</span><button type="button" data-pas="1" data-id="${id}" aria-label="Ligne plus 1">+</button></div>`;
   return `<article class="carte marche ${statut} pile">
     <div class="ligne"><h3>${esc(titre)}</h3>${etiquette}${pas}</div>
-    <span class="petit doux">${esc(fam)}${statut === "candidat" ? " · famille calibrée" : statut === "info" ? " · le marché prévoit mieux" : " · non calibrée"}</span>
+    <span class="petit doux">${esc(fam)}${statut === "candidat" ? " · famille validée (BET possible)" : statut === "info" ? " · information seulement" : " · bloquée par le test de justesse"}</span>
     ${issues.map(is => `
       <div class="issue" data-carte="${id}">
         <div><div class="nom">${esc(is.nom)}</div><div class="proba">${pct(is.p)}</div><div class="mini">cote mini ${is.p > 0.01 ? nb(1 / is.p) : "—"}</div></div>

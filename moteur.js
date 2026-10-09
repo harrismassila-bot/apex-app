@@ -177,8 +177,8 @@
   function verdict(o) {
     const r = { code: "NOBET", raison: "", ev: null, mise: 0 };
     if (!o.p0) { r.raison = "P0 · " + o.p0raison; return r; }
-    if (o.statut === "bloque") { r.raison = "P2 · famille non calibrée (test de justesse)"; return r; }
-    if (o.statut === "info") { r.code = "INFO"; r.raison = "Le marché prévoit mieux que le modèle : information seulement"; return r; }
+    if (o.statut === "bloque") { r.raison = "P2 · famille bloquée : échoue au test de justesse"; return r; }
+    if (o.statut === "info") { r.code = "INFO"; r.raison = "Information seulement : pas d'avantage prouvé face au bookmaker"; return r; }
     if (!o.cote || o.cote <= 1) { r.code = "ATTENTE"; r.raison = "Saisis la cote Betclic"; return r; }
     const ev = o.p * o.cote - 1;
     r.ev = ev;
