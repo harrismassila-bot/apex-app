@@ -99,6 +99,12 @@ body.avec-coupon{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
 .prop .cb b{display:block;font-size:20px;font-weight:500;color:var(--vert)}
 .prop.pris{border-color:var(--vert-bord);background:#132620}
 .prop .alt{grid-column:2 / -1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.grille{grid-column:2 / -1;margin-top:8px}
+.grille .t{font-size:11px;color:var(--doux);margin-bottom:4px}
+.grille .rang2{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.grille .c{flex:0 0 auto;min-width:64px;border:1px solid var(--trait);border-radius:8px;padding:5px 6px;font-family:var(--mono);font-size:11px;text-align:center;color:var(--clair)}
+.grille .c b{display:block;font-size:13px;color:var(--texte);font-weight:500}
+.grille .c.on{border-color:var(--vert)}
 .prop .alt button{font-size:12px;border:1px solid var(--trait);background:transparent;border-radius:8px;padding:6px 8px;min-height:34px;color:var(--clair);cursor:pointer}
 .prop .alt button.on{border-color:var(--vert);color:var(--vert)}
 .rang{font-family:var(--mono);font-size:11px;color:var(--doux)}
@@ -541,9 +547,30 @@ function propositionsMatch(d, code, mt) {
           meilleur = { cle, p, ligne, st: b.stat, side: b.cote, fam: b.fam, lib: `${b.nom(e)} · ${txt} ${nb(ligne, 1)}` };
       }
     }
-    if (meilleur) res.push(meilleur);
+    if (meilleur) { meilleur.grille = grilleLignes(a, b); res.push(meilleur); }
   }
   return res.sort((x, y) => y.p - x.p);
+}
+
+/*
+ * Grille de lignes « comme Betclic » : Betclic propose ses lignes autour de SA médiane
+ * (ex. tirs 13,5 / 16,5 / 19,5), qui ne tombe pas toujours sur la nôtre. On affiche donc
+ * la cote BET d'APEX pour toutes les lignes voisines de la médiane : tu retrouves celle de
+ * Betclic d'un coup d'œil, sans rien taper.
+ */
+const LARGEUR_GRILLE = { tirs: 4, cadres: 2, corners: 3, cartons: 2 };
+function grilleLignes(a, b) {
+  let lignes;
+  if (b.stat === "buts") lignes = [0.5, 1.5, 2.5, 3.5];
+  else {
+    let med = 0.5;                                     // ligne x,5 la plus proche de 50 %
+    for (let l = 0.5; l < 60; l += 1) { const p = a.plus(b.fam, b.stat, b.cote, l); if (p === null) return []; med = l; if (p <= 0.5) break; }
+    const w = LARGEUR_GRILLE[b.stat] || 2;
+    lignes = [];
+    for (let l = Math.max(0.5, med - w); l <= med + w; l += 1) lignes.push(l);
+  }
+  return lignes.map(l => { const p = a.plus(b.fam, b.stat, b.cote, l);
+    return { ligne: l, plus: p > 0.01 ? 1.05 / p : null, moins: p < 0.99 ? 1.05 / (1 - p) : null }; });
 }
 
 /** Calcule (ou reprend du cache) toutes les propositions de la semaine. */
@@ -619,6 +646,7 @@ async function vueSemaine(v) {
       <span class="cb">cote BET<b>${nb(1.05 / o.p)}</b>mini ${nb(1 / o.p)}</span>
       <span class="choix">${esc(o.lib)}</span>
       <span class="p">prob. ${pct(o.p)}</span>
+      ${o.grille && o.grille.length ? `<div class="grille"><div class="t">Trouve la ligne de Betclic · cote BET APEX (plus / moins)</div><div class="rang2">${o.grille.map(g => `<span class="c ${g.ligne === o.ligne ? "on" : ""}"><b>${nb(g.ligne, 1)}</b>+ ${g.plus ? nb(g.plus) : "—"}<br>− ${g.moins ? nb(g.moins) : "—"}</span>`).join("")}</div></div>` : ""}
       ${pr.options.length > 1 ? `<div class="alt">${pr.options.slice(0, 3).map((x, i) => `<button type="button" data-opt="${i}" class="${idSel(pr, x) === idSel(pr, o) ? "on" : ""}">${esc(x.lib.split(" · ").slice(-2).join(" · "))} · ${pct(x.p)}</button>`).join("")}</div>` : ""}
     </article>`;
   };
