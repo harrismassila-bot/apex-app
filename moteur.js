@@ -94,7 +94,9 @@
         }
       }
     }
-    const F = { ligue: {}, equipes: {}, dispersion: data.dispersion || {} };
+    // promus : leur force de départ est le niveau moyen des promus passés, pas la moyenne de la ligue
+    const promus = new Set(data.promus || []), ratios = data.ratios_promus || {};
+    const F = { ligue: {}, equipes: {}, dispersion: data.dispersion || {}, promus, ratios };
     for (const [s, [sw, sh, sa]] of Object.entries(sommes)) {
       if (sw < 10) continue;
       const mh = sh / sw, ma = sa / sw;
@@ -103,10 +105,11 @@
       for (const [eq, stats] of Object.entries(brut)) {
         if (!stats[s]) continue;
         const f = ((F.equipes[eq] = F.equipes[eq] || {})[s] = {});
+        const r = promus.has(eq) ? (ratios[s] || {}) : {};
         for (const cle of CLES) {
           if (!stats[s][cle]) continue;
           const [somme, poids] = stats[s][cle];
-          f[cle] = [(somme + K * prior[cle]) / (poids + K), poids];
+          f[cle] = [(somme + K * prior[cle] * (r[cle] ?? 1)) / (poids + K), poids];
         }
       }
     }
@@ -117,10 +120,12 @@
     if (!F.ligue[s]) return null;
     const [mh, ma] = F.ligue[s];
     const fd = (F.equipes[dom] || {})[s] || {}, fe = (F.equipes[ext] || {})[s] || {};
-    const [pourD, nd] = fd.pour_dom || [mh, 0];
-    const [contreD] = fd.contre_dom || [ma, 0];
-    const [pourE, ne] = fe.pour_ext || [ma, 0];
-    const [contreE] = fe.contre_ext || [mh, 0];
+    // équipe sans aucune donnée : moyenne de la ligue, ou niveau moyen des promus si c'en est un
+    const k = (eq, cle) => (F.promus && F.promus.has(eq) ? ((F.ratios || {})[s] || {})[cle] ?? 1 : 1);
+    const [pourD, nd] = fd.pour_dom || [mh * k(dom, "pour_dom"), 0];
+    const [contreD] = fd.contre_dom || [ma * k(dom, "contre_dom"), 0];
+    const [pourE, ne] = fe.pour_ext || [ma * k(ext, "pour_ext"), 0];
+    const [contreE] = fe.contre_ext || [mh * k(ext, "contre_ext"), 0];
     return { dom: mh > 0 ? pourD * contreE / mh : 0, ext: ma > 0 ? pourE * contreD / ma : 0, n: Math.min(nd, ne) };
   }
 
@@ -176,6 +181,9 @@
    * Portes de décision (cahier des charges) :
    * P0 données fraîches · P2 famille calibrée / contexte · P3 valeur (EV ≥ 5 %) · P4 mise.
    */
+  /** Edge au-delà duquel on considère qu'APEX se trompe plutôt que Betclic (pari simple). */
+  const EV_MAX = 0.20;
+
   function verdict(o) {
     const r = { code: "NOBET", raison: "", ev: null, mise: 0 };
     if (!o.p0) { r.raison = "P0 · " + o.p0raison; return r; }
@@ -184,6 +192,16 @@
     if (!o.cote || o.cote <= 1) { r.code = "ATTENTE"; r.raison = "Saisis la cote Betclic"; return r; }
     const ev = o.p * o.cote - 1;
     r.ev = ev;
+    const apex = Math.round(100 * o.p), bookmaker = Math.round(100 / o.cote);
+    const compare = ` (APEX ${apex} %, Betclic ${bookmaker} %)`;
+    // Garde-fou « désaccord » : un edge énorme est presque toujours une erreur d'APEX
+    // (compo, blessure, promu, données manquantes), rarement une erreur du bookmaker.
+    const evMax = o.evMax ?? EV_MAX;
+    if (ev > evMax) {
+      r.desaccord = true;
+      r.raison = "Désaccord trop fort avec Betclic" + compare + " : erreur probable d'APEX, on s'abstient";
+      return r;
+    }
     if (ev >= 0.05) {
       if (o.contexte) {
         if (o.p >= 0.7) { r.code = "SECURISE"; r.raison = "Valeur, mais contexte à risque : combiné seulement"; }
@@ -192,7 +210,7 @@
     } else if (ev > 0 && o.p >= 0.7) {
       r.code = "SECURISE"; r.raison = "Probable mais peu de valeur : combiné seulement";
     } else {
-      r.raison = "P3 · edge de " + (100 * ev).toFixed(1).replace(".", ",") + " %, sous le seuil de 5 %";
+      r.raison = "P3 · edge de " + (100 * ev).toFixed(1).replace(".", ",") + " %, sous le seuil de 5 %" + compare;
     }
     if (r.code === "BET") {
       const kelly = ev / (o.cote - 1);

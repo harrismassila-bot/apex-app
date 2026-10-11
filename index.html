@@ -492,6 +492,7 @@ function enregistrer(btn) {
     // de quoi régler le pari automatiquement une fois le match saisi
     dom: choix.dom, ext: choix.ext, st: inp.dataset.st, side: inp.dataset.side,
     ligne: inp.dataset.ligne === "" ? null : Number(inp.dataset.ligne), cle: inp.dataset.cle, auto: false,
+    desaccord: !!r.desaccord,
   });
   if (store.ecrire("journal", etat.journal)) { btn.textContent = "✓ Enregistré"; btn.disabled = true; }
 }
@@ -675,7 +676,9 @@ function vueCoupon(v) {
   let r = null, cote = null;
   const maj = () => {
     cote = lireCote(q("#k-cote").value);
-    r = M.verdict({ p: b.p, cote, statut: "candidat", p0: true, contexte: false, bankroll: bj.capital, pause: bj.pause });
+    // garde-fou de désaccord adapté au combiné : 20 % d'edge maximum PAR sélection
+    r = M.verdict({ p: b.p, cote, statut: "candidat", p0: true, contexte: false, bankroll: bj.capital, pause: bj.pause,
+                    evMax: Math.pow(1.2, b.n) - 1 });
     q("#k-badge").className = "badge b-" + r.code;
     q("#k-badge").textContent = { BET: "BET", SECURISE: "SÉCURISÉ", NOBET: "NO BET", INFO: "INFO", ATTENTE: "COTE ?" }[r.code];
     q("#k-raison").textContent = r.code === "ATTENTE" ? "Saisis la cote totale Betclic" : r.raison + (r.code === "BET" ? ` · mise ${xof(r.mise)}` : "");
@@ -693,7 +696,7 @@ function vueCoupon(v) {
       code: [...new Set(legs.map(l => l.code))].join("+"), ligue: [...new Set(legs.map(l => l.ligue))].join(", "),
       match: `Combiné · ${legs.length} sélection${legs.length > 1 ? "s" : ""}`, dateMatch: legs.map(l => l.dateMatch).sort().pop(),
       marche: legs.map(l => l.lib).join(" + "), famille: "Combiné", p: b.p, cote, verdict: r.code, ev: r.ev, mise: r.mise,
-      cloture: null, resultat: null, auto: false, legs,
+      cloture: null, resultat: null, auto: false, legs, desaccord: !!r.desaccord,
     });
     if (store.ecrire("journal", etat.journal)) { etat.coupon = []; store.ecrire("coupon", etat.coupon); aller("journal"); }
   };
@@ -905,6 +908,10 @@ function vueJournal(v) {
       <div class="ligne petit"><span class="doux">Capital papier actuel</span><span class="mono">${xof(b.capital)}</span></div>
       <div class="grille2"><button type="button" class="bouton second petit" id="j-exp">Sauvegarder</button><label class="bouton second petit" style="cursor:pointer">Restaurer<input type="file" accept="application/json" id="j-imp" class="cache"></label></div>
     </section>
+    ${(() => { const d = etat.journal.filter(p => p.desaccord && p.resultat && p.resultat !== "rembourse");
+      if (!d.length) return "";
+      const g = d.filter(p => p.resultat === "gagne").length, att = d.reduce((x, p) => x + p.p, 0), bk = d.reduce((x, p) => x + 1 / p.cote, 0);
+      return `<section class="carte pile"><h2>Garde-fou « désaccord »</h2><p class="petit" style="margin:0;color:var(--clair)">${d.length} pari${d.length > 1 ? "s" : ""} évité${d.length > 1 ? "s" : ""} · ${g} gagné${g > 1 ? "s" : ""} en réalité · APEX en attendait ${nb(att, 1)}, Betclic ${nb(bk, 1)}. Si le réel colle à Betclic, le garde-fou a eu raison.</p></section>`; })()}
     <h2 style="margin:18px 0 10px">Paris enregistrés (${entrees.length})</h2>
     ${(() => { const att = entrees.filter(p => !p.resultat && p.dateMatch && p.dateMatch < aujourdhui()).length;
       return att ? `<p class="petit doux" style="margin:-4px 0 12px">${att} pari${att > 1 ? "s" : ""} joué${att > 1 ? "s" : ""} sans résultat : saisis le match dans « Matchs récents », il sera réglé tout seul (sauf cartons).</p>` : ""; })()}
