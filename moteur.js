@@ -74,6 +74,8 @@
     }
     for (const m of manuels || []) {
       if (!(m.date < jour)) continue;
+      // déjà inclus dans les données officielles : on ne le compte pas deux fois
+      if (data.dernier_match && m.date <= data.dernier_match) continue;
       const w = Math.pow(0.5, jours(m.date, jour) / H);
       for (const [s, hv] of Object.entries(m.v)) {
         const [h, a] = hv;
@@ -201,5 +203,35 @@
     return r;
   }
 
-  racine.ApexMoteur = { analyser, verdict, construireForces, attendu, pPlus, poisson, lgamma };
+  // ------------------------------------------------------------ règlement
+  /**
+   * Règle un pari d'après les stats du match joué (v = { buts:[h,a], tirs:[h,a], … }).
+   * Renvoie "gagne", "perdu", "rembourse" ou null (stat absente / pari non réglable).
+   * Les cartons ne sont jamais réglés automatiquement : le barème Betclic
+   * (rouge = 1 ou 2 cartons ?) n'est pas encore confirmé.
+   */
+  function reglerPari(pari, v) {
+    if (!pari || !v || !pari.cle) return null;
+    if (pari.st === "cartons") return null;
+    if (pari.side === "1n2" || pari.side === "dc" || pari.side === "btts") {
+      if (!v.buts) return null;
+      const [h, a] = v.buts;
+      const ok = {
+        "1": h > a, "N": h === a, "2": h < a,
+        "1N": h >= a, "N2": h <= a, "12": h !== a,
+        "oui": h > 0 && a > 0, "non": !(h > 0 && a > 0),
+      }[pari.cle];
+      return ok === undefined ? null : (ok ? "gagne" : "perdu");
+    }
+    const hv = v[pari.st];
+    if (!hv || typeof pari.ligne !== "number") return null;
+    const x = pari.side === "total" ? hv[0] + hv[1] : pari.side === "dom" ? hv[0] : pari.side === "ext" ? hv[1] : null;
+    if (x === null || x === undefined) return null;
+    if (x === pari.ligne) return "rembourse";
+    if (pari.cle === "plus") return x > pari.ligne ? "gagne" : "perdu";
+    if (pari.cle === "moins") return x < pari.ligne ? "gagne" : "perdu";
+    return null;
+  }
+
+  racine.ApexMoteur = { analyser, verdict, construireForces, attendu, pPlus, poisson, lgamma, reglerPari };
 })(typeof window !== "undefined" ? window : globalThis);

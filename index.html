@@ -83,9 +83,27 @@ table.att td:first-child{font-family:var(--sans)}
 .issue .mini{font-size:12px;color:var(--doux)}
 .issue .verdict{grid-column:1 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--clair)}
 .issue .verdict .enreg{margin-left:auto}
-.onglets{position:fixed;left:0;right:0;bottom:0;background:var(--barre);border-top:1px solid var(--trait);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.onglets{position:fixed;left:0;right:0;bottom:0;background:var(--barre);border-top:1px solid var(--trait);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);z-index:5}
 .onglets button{min-height:62px;border:0;background:transparent;color:var(--doux);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .onglets button[aria-current=page]{color:var(--vert)}
+body.avec-coupon{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
+.barre-coupon{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom));z-index:6;padding:0 12px 8px}
+.barre-coupon button{max-width:536px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:0 16px;border-radius:14px;border:1px solid var(--vert-bord);background:#0F2A21;color:var(--texte);font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.barre-coupon .mono{color:var(--vert);font-size:15px}
+.prop{display:grid;grid-template-columns:28px 1fr auto;gap:2px 12px;align-items:center;padding:14px 16px}
+.prop input[type=checkbox]{width:22px;height:22px;accent-color:var(--vert);grid-row:1 / span 3}
+.prop .match{font-size:12px;color:var(--doux)}
+.prop .choix{font-size:15px;font-weight:600}
+.prop .p{font-family:var(--mono);font-size:13px;color:var(--clair)}
+.prop .cb{grid-row:1 / span 3;grid-column:3;text-align:right;font-family:var(--mono);font-size:11px;color:var(--doux)}
+.prop .cb b{display:block;font-size:20px;font-weight:500;color:var(--vert)}
+.prop.pris{border-color:var(--vert-bord);background:#132620}
+.prop .alt{grid-column:2 / -1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.prop .alt button{font-size:12px;border:1px solid var(--trait);background:transparent;border-radius:8px;padding:6px 8px;min-height:34px;color:var(--clair);cursor:pointer}
+.prop .alt button.on{border-color:var(--vert);color:var(--vert)}
+.rang{font-family:var(--mono);font-size:11px;color:var(--doux)}
+.jambes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.jambes li{display:flex;justify-content:space-between;gap:8px}
 .kpi{display:flex;flex-direction:column;gap:6px}
 .kpi .v{font-family:var(--mono);font-size:22px;font-weight:500}
 .liste-eq{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px}
@@ -94,6 +112,28 @@ table.att td:first-child{font-family:var(--sans)}
 .vide{text-align:center;color:var(--doux);font-size:14px;padding:24px 8px}
 .stats-match{display:grid;grid-template-columns:1fr 84px 84px;gap:8px;align-items:center;font-size:14px}
 .erreur{color:var(--rouge);font-size:13px}
+.avert{color:var(--ambre);font-size:13px;display:flex;flex-direction:column;gap:4px}
+.liste-bc{display:flex;flex-direction:column}
+.liste-bc button{display:grid;grid-template-columns:1fr auto auto;gap:4px 12px;align-items:center;text-align:left;background:transparent;border:0;border-top:1px solid var(--trait2);padding:10px 0;min-height:52px;cursor:pointer}
+.liste-bc button:first-child{border-top:0}
+.liste-bc .lib{font-size:14px}
+.liste-bc .lib small{display:block;color:var(--doux);font-size:12px;font-family:var(--mono)}
+.liste-bc .c{font-family:var(--mono);font-size:13px;text-align:right;color:var(--doux)}
+.liste-bc .c b{display:block;color:var(--vert);font-size:16px;font-weight:500}
+details.replie{margin-bottom:12px}
+details.replie>summary{list-style:none;cursor:pointer;min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border:1px solid var(--trait);border-radius:12px;color:var(--doux);font-size:14px}
+details.replie>summary::-webkit-details-marker{display:none}
+details.replie>summary::after{content:"▾";font-size:14px}
+details.replie[open]>summary{margin-bottom:12px}
+details.replie[open]>summary::after{content:"▴"}
+.relecture{border-color:var(--ambre-bord)}
+.relecture table{width:100%;border-collapse:collapse;font-size:14px}
+.relecture td{padding:6px 0;border-top:1px solid var(--trait2);font-family:var(--mono);text-align:center}
+.relecture td:first-child{font-family:var(--sans);text-align:left}
+.relecture td.haut{color:var(--ambre);font-weight:600}
+.auto{color:var(--vert);font-size:12px}
+.issue.vise{animation:vise 1.4s ease-out}
+@keyframes vise{0%{background:var(--vert-fond)}100%{background:transparent}}
 </style>
 </head>
 <body>
@@ -105,13 +145,16 @@ table.att td:first-child{font-family:var(--sans)}
   <main id="vue" aria-live="polite"></main>
 </div>
 
+<div class="barre-coupon cache" id="barre-coupon"><button type="button" id="ouvrir-coupon"></button></div>
 <nav class="onglets" aria-label="Navigation principale">
   <button type="button" data-vue="accueil">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+  <button type="button" data-vue="semaine">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Semaine</button>
   <button type="button" data-vue="analyser">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Analyser</button>
   <button type="button" data-vue="recents">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Matchs récents</button>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Récents</button>
   <button type="button" data-vue="journal">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M9 11h7M9 15h7"/></svg>Journal</button>
 </nav>
@@ -133,6 +176,7 @@ const etat = {
   index: null, donnees: {}, erreur: null,
   manuels: store.lire("manuels", []),
   journal: store.lire("journal", []),
+  coupon: store.lire("coupon", []),        // sélections choisies dans l'onglet « Semaine »
   bankroll: store.lire("bankroll", 100000),
   choix: store.lire("choix", { code: "SP1", dom: "", ext: "", date: "", ctx: {} }),
   analyse: null, lignes: {},
@@ -196,7 +240,8 @@ function rendre() {
   const v = document.getElementById("vue");
   if (etat.erreur) { v.innerHTML = `<div class="alerte">${esc(etat.erreur)}</div>`; return; }
   if (!etat.index) { v.innerHTML = `<div class="vide">Chargement des données…</div>`; return; }
-  ({ accueil: vueAccueil, analyser: vueAnalyser, recents: vueRecents, journal: vueJournal }[etat.vue] || vueAccueil)(v);
+  ({ accueil: vueAccueil, semaine: vueSemaine, coupon: vueCoupon, analyser: vueAnalyser, recents: vueRecents, journal: vueJournal }[etat.vue] || vueAccueil)(v);
+  majBarreCoupon();
 }
 
 // ------------------------------------------------------------ vue : accueil
@@ -208,7 +253,9 @@ function vueAccueil(v) {
       <span class="mono ${retard > 14 ? "" : "doux"}" style="${retard > 14 ? "color:var(--ambre)" : ""}">jusqu'au ${dateFr(l.dernier_match)}</span></div>`;
   }).join("");
   v.innerHTML = `
-    <button class="bouton" type="button" id="go">Nouvelle analyse</button>
+    <button class="bouton" type="button" id="go-sem">Propositions de la semaine</button>
+    <div style="height:10px"></div>
+    <button class="bouton second" type="button" id="go">Analyser un match précis</button>
     <div style="height:16px"></div>
     <section class="carte pile"><div class="ligne"><h2>Données</h2><span class="petit doux">mise à jour mardi et vendredi</span></div>${ligues}
       <p class="petit doux" style="margin:0">Source : football-data.co.uk. Si une équipe a joué depuis la date affichée, ajoute ce match dans « Matchs récents ».</p></section>
@@ -219,6 +266,7 @@ function vueAccueil(v) {
     <section class="carte pile"><h2>Règles du jeu</h2>
       <p class="petit" style="margin:0;color:var(--clair)">BET seulement si les 5 portes passent : données fraîches, famille calibrée, contexte sain, edge ≥ 5 %, mise ≤ 3 % de la bankroll (quart de Kelly). Les verdicts restent en papier tant que le journal n'a pas validé 200 paris.</p></section>`;
   v.querySelector("#go").onclick = () => aller("analyser");
+  v.querySelector("#go-sem").onclick = () => aller("semaine");
 }
 
 // ------------------------------------------------------------ vue : analyser
@@ -337,24 +385,60 @@ function rendreMarches(p0, ctx, b) {
   const ordre = { candidat: 0, info: 1, bloque: 2 };
   const statut = fam => d.statut[fam] || "bloque";
   const cartes = [];
+  const ajouter = (id, fam, titre, ligne, meta, issues) => {
+    const st = statut(fam);
+    cartes.push({ ordre: ordre[st], statut: st, titre, issues, id, html: carteMarche(id, fam, titre, st, ligne, meta, issues) });
+  };
   // marchés à ligne (plus / moins)
   for (const mk of MARCHES) {
     if (!a.attendus[mk.stat]) continue;
     const ligne = etat.lignes[mk.id] ?? mk.ligne;
     const pPlus = a.plus(mk.fam, mk.stat, mk.cote, ligne);
     if (pPlus === null) continue;
-    cartes.push({ ordre: ordre[statut(mk.fam)], html: carteMarche(mk.id, mk.fam, mk.nom(choix), statut(mk.fam), ligne,
-      [{ cle: "plus", nom: `Plus de ${nb(ligne, 1)}`, p: pPlus }, { cle: "moins", nom: `Moins de ${nb(ligne, 1)}`, p: 1 - pPlus }]) });
+    ajouter(mk.id, mk.fam, mk.nom(choix), ligne, { st: mk.stat, side: mk.cote },
+      [{ cle: "plus", nom: `Plus de ${nb(ligne, 1)}`, p: pPlus }, { cle: "moins", nom: `Moins de ${nb(ligne, 1)}`, p: 1 - pPlus }]);
   }
-  cartes.push({ ordre: ordre[statut("1N2")], html: carteMarche("1n2", "1N2", "Résultat (1N2)", statut("1N2"), null,
-    [{ cle: "1", nom: `1 · ${choix.dom}`, p: a.prob1n2["1"] }, { cle: "N", nom: "N · Nul", p: a.prob1n2["N"] }, { cle: "2", nom: `2 · ${choix.ext}`, p: a.prob1n2["2"] }]) });
-  cartes.push({ ordre: ordre[statut("Double chance")], html: carteMarche("dc", "Double chance", "Double chance", statut("Double chance"), null,
-    [{ cle: "1N", nom: "1N", p: a.probDC["1N"] }, { cle: "N2", nom: "N2", p: a.probDC["N2"] }, { cle: "12", nom: "12", p: a.probDC["12"] }]) });
-  cartes.push({ ordre: ordre[statut("Buts")], html: carteMarche("btts", "Buts", "Les deux équipes marquent", statut("Buts"), null,
-    [{ cle: "oui", nom: "Oui", p: a.probBTTS }, { cle: "non", nom: "Non", p: 1 - a.probBTTS }]) });
+  ajouter("1n2", "1N2", "Résultat (1N2)", null, { st: "buts", side: "1n2" },
+    [{ cle: "1", nom: `1 · ${choix.dom}`, p: a.prob1n2["1"] }, { cle: "N", nom: "N · Nul", p: a.prob1n2["N"] }, { cle: "2", nom: `2 · ${choix.ext}`, p: a.prob1n2["2"] }]);
+  ajouter("dc", "Double chance", "Double chance", null, { st: "buts", side: "dc" },
+    [{ cle: "1N", nom: "1N", p: a.probDC["1N"] }, { cle: "N2", nom: "N2", p: a.probDC["N2"] }, { cle: "12", nom: "12", p: a.probDC["12"] }]);
+  ajouter("btts", "Buts", "Les deux équipes marquent", null, { st: "buts", side: "btts" },
+    [{ cle: "oui", nom: "Oui", p: a.probBTTS }, { cle: "non", nom: "Non", p: 1 - a.probBTTS }]);
   cartes.sort((x, y) => x.ordre - y.ordre);
+
+  // « Ta liste Betclic » : seules les issues des familles validées, les plus probables d'abord.
+  // Cote BET = cote à partir de laquelle l'edge atteint 5 % (1,05 ÷ probabilité).
+  const cibles = [];
+  for (const c of cartes) if (c.statut === "candidat")
+    for (const is of c.issues) if (is.p >= 0.5 && is.p < 0.995) cibles.push({ id: c.id, cle: is.cle, lib: c.titre + " · " + is.nom, p: is.p });
+  cibles.sort((x, y) => y.p - x.p);
+  const listeBc = cibles.length ? `
+    <section class="carte pile" id="liste-bc">
+      <div class="ligne"><h2>Ta liste Betclic</h2><span class="petit doux">${cibles.length} ligne${cibles.length > 1 ? "s" : ""} à vérifier</span></div>
+      <p class="petit doux" style="margin:0">Cherche seulement ces lignes sur Betclic. Si la cote affichée est au moins égale à la <b style="color:var(--vert)">cote BET</b>, touche la ligne et saisis la cote. En dessous : passe ton chemin.</p>
+      ${!p0.ok ? `<p class="petit" style="margin:0;color:var(--ambre)">Porte P0 fermée : aucun BET possible tant que les matchs récents ne sont pas saisis.</p>` : ""}
+      <div class="liste-bc">${cibles.map(t => `
+        <button type="button" data-viser="c-${t.id}-${t.cle}">
+          <span class="lib">${esc(t.lib)}<small>prob. ${pct(t.p)}</small></span>
+          <span class="c">mini<br>${nb(1 / t.p)}</span>
+          <span class="c">cote BET<b>${nb(1.05 / t.p)}</b></span>
+        </button>`).join("")}</div>
+    </section>` : `<div class="alerte"><span>Aucune issue validée à 50 % ou plus sur ce match : rien à chercher sur Betclic.</span></div>`;
+  const valides = cartes.filter(c => c.statut === "candidat"), autres = cartes.filter(c => c.statut !== "candidat");
   const zone = document.getElementById("marches");
-  zone.innerHTML = cartes.map(c => c.html).join("");
+  zone.innerHTML = listeBc + valides.map(c => c.html).join("") + (autres.length ? `
+    <details class="replie" ${etat.ouvrirAutres ? "open" : ""}><summary>Marchés en information et bloqués (${autres.length})</summary>
+      ${autres.map(c => c.html).join("")}</details>` : "");
+  const det = zone.querySelector("details.replie");
+  if (det) det.ontoggle = () => { etat.ouvrirAutres = det.open; };
+  zone.querySelectorAll("[data-viser]").forEach(btn => btn.onclick = () => {
+    const inp = document.getElementById(btn.dataset.viser);
+    if (!inp) return;
+    const bloc = inp.closest(".issue");
+    bloc.scrollIntoView({ behavior: "smooth", block: "center" });
+    bloc.classList.remove("vise"); void bloc.offsetWidth; bloc.classList.add("vise");
+    setTimeout(() => inp.focus({ preventScroll: true }), 350);
+  });
   // interactions
   zone.querySelectorAll("[data-pas]").forEach(btn => btn.onclick = () => {
     const id = btn.dataset.id, mk = MARCHES.find(m => m.id === id);
@@ -369,7 +453,7 @@ function rendreMarches(p0, ctx, b) {
   zone.querySelectorAll("button[data-enreg]").forEach(btn => btn.onclick = () => enregistrer(btn));
 }
 
-function carteMarche(id, fam, titre, statut, ligne, issues) {
+function carteMarche(id, fam, titre, statut, ligne, meta, issues) {
   const etiquette = { candidat: "", info: '<span class="badge b-INFO">INFO</span>', bloque: '<span class="badge b-NOBET">BLOQUÉ</span>' }[statut];
   const pas = ligne === null ? "" : `<div class="pas"><button type="button" data-pas="-1" data-id="${id}" aria-label="Ligne moins 1">−</button><span class="val">${nb(ligne, 1)}</span><button type="button" data-pas="1" data-id="${id}" aria-label="Ligne plus 1">+</button></div>`;
   return `<article class="carte marche ${statut} pile">
@@ -378,7 +462,7 @@ function carteMarche(id, fam, titre, statut, ligne, issues) {
     ${issues.map(is => `
       <div class="issue" data-carte="${id}">
         <div><div class="nom">${esc(is.nom)}</div><div class="proba">${pct(is.p)}</div><div class="mini">cote mini ${is.p > 0.01 ? nb(1 / is.p) : "—"}</div></div>
-        <label class="champ" style="font-size:11px">Cote Betclic<input class="chiffre" inputmode="decimal" placeholder="ex. 1,85" data-cote data-p="${is.p}" data-statut="${statut}" data-fam="${esc(fam)}" data-libelle="${esc(titre + " · " + is.nom)}"></label>
+        <label class="champ" style="font-size:11px">Cote Betclic<input class="chiffre" inputmode="decimal" placeholder="ex. 1,85" id="c-${id}-${is.cle}" data-cote data-p="${is.p}" data-st="${meta.st}" data-side="${meta.side}" data-ligne="${ligne === null ? "" : ligne}" data-cle="${is.cle}" data-statut="${statut}" data-fam="${esc(fam)}" data-libelle="${esc(titre + " · " + is.nom)}"></label>
         <div class="verdict"><span class="badge"></span><span class="raison"></span><button type="button" class="bouton second petit enreg cache" data-enreg>Enregistrer</button></div>
       </div>`).join("")}
   </article>`;
@@ -405,8 +489,214 @@ function enregistrer(btn) {
     id: Date.now().toString(36), cree: new Date().toISOString(), code: d.code, ligue: d.ligue,
     match: `${choix.dom} – ${choix.ext}`, dateMatch: choix.date, marche: inp.dataset.libelle, famille: inp.dataset.fam,
     p: Number(inp.dataset.p), cote: btn._cote, verdict: r.code, ev: r.ev, mise: r.mise, cloture: null, resultat: null,
+    // de quoi régler le pari automatiquement une fois le match saisi
+    dom: choix.dom, ext: choix.ext, st: inp.dataset.st, side: inp.dataset.side,
+    ligne: inp.dataset.ligne === "" ? null : Number(inp.dataset.ligne), cle: inp.dataset.cle, auto: false,
   });
   if (store.ecrire("journal", etat.journal)) { btn.textContent = "✓ Enregistré"; btn.disabled = true; }
+}
+
+// ------------------------------------------------------------ vue : semaine (propositions automatiques)
+/*
+ * Pour chaque match à venir des ligues testées, on essaie toutes les familles VALIDÉES
+ * à plusieurs lignes, et on garde par match la proposition la plus probable dans la zone
+ * de probabilité utile (60 à 80 %, soit une cote juste entre 1,25 et 1,67).
+ * Classement = probabilité, PAS la valeur : la valeur se décide en comparant à la cote Betclic.
+ */
+const P_MIN = 0.60, P_MAX = 0.80, TOP = 15;
+const BALAYAGE = [
+  { id: "be-dom", fam: "Buts équipe", stat: "buts", cote: "dom", lignes: [0.5, 1.5, 2.5], nom: e => `${e.dom} : buts` },
+  { id: "be-ext", fam: "Buts équipe", stat: "buts", cote: "ext", lignes: [0.5, 1.5, 2.5], nom: e => `${e.ext} : buts` },
+  { id: "co-tot", fam: "Corners", stat: "corners", cote: "total", lignes: [7.5, 8.5, 9.5, 10.5, 11.5], nom: () => "Corners du match" },
+  { id: "tc-dom", fam: "Tirs cadrés", stat: "cadres", cote: "dom", lignes: [1.5, 2.5, 3.5, 4.5, 5.5, 6.5], nom: e => `${e.dom} : tirs cadrés` },
+  { id: "tc-ext", fam: "Tirs cadrés", stat: "cadres", cote: "ext", lignes: [1.5, 2.5, 3.5, 4.5, 5.5, 6.5], nom: e => `${e.ext} : tirs cadrés` },
+  { id: "ti-dom", fam: "Tirs", stat: "tirs", cote: "dom", lignes: [7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5, 16.5], nom: e => `${e.dom} : tirs` },
+  { id: "ti-ext", fam: "Tirs", stat: "tirs", cote: "ext", lignes: [5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5], nom: e => `${e.ext} : tirs` },
+  { id: "ca-tot", fam: "Cartons", stat: "cartons", cote: "total", lignes: [2.5, 3.5, 4.5, 5.5, 6.5], nom: () => "Cartons du match" },
+];
+
+/** Dernier match connu d'une équipe (données officielles + tes saisies). */
+function dernierConnu(d, code, eq) {
+  let x = d.dernier_match_equipe[eq] || null;
+  for (const m of etat.manuels) if (m.code === code && (m.dom === eq || m.ext === eq) && (!x || m.date > x)) x = m.date;
+  return x;
+}
+
+/** Toutes les propositions d'un match, la meilleure en premier (une par marché). */
+function propositionsMatch(d, code, mt) {
+  const manuels = etat.manuels.filter(m => m.code === code);
+  const a = M.analyser(d, manuels, mt.dom, mt.ext, mt.date);
+  if (!a) return [];
+  const e = { dom: mt.dom, ext: mt.ext }, res = [];
+  for (const b of BALAYAGE) {
+    if ((d.statut[b.fam] || "bloque") !== "candidat" || !a.attendus[b.stat]) continue;
+    let meilleur = null;
+    for (const ligne of b.lignes) {
+      const pp = a.plus(b.fam, b.stat, b.cote, ligne);
+      if (pp === null) continue;
+      for (const [cle, p, txt] of [["plus", pp, "Plus de"], ["moins", 1 - pp, "Moins de"]]) {
+        if (p < P_MIN || p > P_MAX) continue;
+        if (!meilleur || p > meilleur.p)
+          meilleur = { cle, p, ligne, st: b.stat, side: b.cote, fam: b.fam, lib: `${b.nom(e)} · ${txt} ${nb(ligne, 1)}` };
+      }
+    }
+    if (meilleur) res.push(meilleur);
+  }
+  return res.sort((x, y) => y.p - x.p);
+}
+
+/** Calcule (ou reprend du cache) toutes les propositions de la semaine. */
+async function calculerSemaine() {
+  const jour = aujourdhui();
+  const cleCache = jour + "|" + etat.manuels.length + "|" + etat.index.genere_le;
+  if (etat.semaine && etat.semaine.cle === cleCache) return etat.semaine;
+  const props = [], ecartes = [];
+  let examines = 0;
+  for (const l of etat.index.ligues) {
+    if (!l.teste) continue;
+    let d;
+    try { d = await chargerLigue(l.code); } catch (_) { continue; }
+    for (const mt of d.a_venir || []) {
+      if (mt.date < jour) continue;
+      examines++;
+      const base = { code: l.code, ligue: d.ligue, date: mt.date, heure: mt.heure, dom: mt.dom, ext: mt.ext };
+      if (!mt.connu) { ecartes.push({ ...base, raison: "équipe absente des données (promu ?)" }); continue; }
+      const vieux = [mt.dom, mt.ext].filter(eq => { const x = dernierConnu(d, l.code, eq); return !x || jours(x, mt.date) > P0_JOURS; });
+      if (vieux.length) { ecartes.push({ ...base, raison: `P0 : données de ${vieux.join(" et ")} trop anciennes` }); continue; }
+      const options = propositionsMatch(d, l.code, mt);
+      if (!options.length) { ecartes.push({ ...base, raison: "aucune ligne validée entre 60 et 80 %" }); continue; }
+      props.push({ ...base, cle: `${l.code}|${mt.date}|${mt.dom}|${mt.ext}`, options });
+    }
+  }
+  props.sort((x, y) => y.options[0].p - x.options[0].p);
+  return (etat.semaine = { cle: cleCache, props, ecartes, examines });
+}
+
+const idSel = (pr, o) => `${pr.cle}|${o.st}|${o.side}|${o.ligne}|${o.cle}`;
+
+function basculerCoupon(pr, o) {
+  const id = idSel(pr, o);
+  const deja = etat.coupon.find(c => c.id === id);
+  etat.coupon = etat.coupon.filter(c => c.match !== pr.cle);       // une seule sélection par match
+  if (!deja) etat.coupon.push({ id, match: pr.cle, code: pr.code, ligue: pr.ligue, dom: pr.dom, ext: pr.ext, dateMatch: pr.date,
+                                 heure: pr.heure, lib: o.lib, fam: o.fam, st: o.st, side: o.side, ligne: o.ligne, cle: o.cle, p: o.p });
+  store.ecrire("coupon", etat.coupon);
+}
+
+function bilanCoupon() {
+  const p = etat.coupon.reduce((s, c) => s * c.p, 1);
+  return { n: etat.coupon.length, p, mini: 1 / p, bet: 1.05 / p };
+}
+
+function majBarreCoupon() {
+  const barre = document.getElementById("barre-coupon");
+  if (!barre) return;
+  const montrer = etat.coupon.length > 0 && etat.vue === "semaine";
+  barre.classList.toggle("cache", !montrer);
+  document.body.classList.toggle("avec-coupon", montrer);
+  if (!montrer) return;
+  const b = bilanCoupon();
+  const btn = document.getElementById("ouvrir-coupon");
+  btn.innerHTML = `<span><b>Coupon</b> · ${b.n} · ${pct(b.p)}</span><span>cote BET <span class="mono">${nb(b.bet)}</span> ›</span>`;
+  btn.onclick = () => aller("coupon");
+}
+
+async function vueSemaine(v) {
+  v.innerHTML = `<div class="vide">Examen des matchs de la semaine…</div>`;
+  const S = await calculerSemaine();
+  if (etat.vue !== "semaine") return;
+  const dates = S.props.concat(S.ecartes).map(x => x.date).sort();
+  const periode = dates.length ? `du ${dateFr(dates[0])} au ${dateFr(dates[dates.length - 1])}` : "";
+  const montrerTout = !!etat.semaineTout;
+  const liste = montrerTout ? S.props : S.props.slice(0, TOP);
+  const carte = (pr, rang) => {
+    const choisi = etat.coupon.find(c => c.match === pr.cle);
+    const o = choisi ? pr.options.find(x => idSel(pr, x) === choisi.id) || pr.options[0] : pr.options[0];
+    return `<article class="carte prop ${choisi ? "pris" : ""}" data-match="${esc(pr.cle)}">
+      <input type="checkbox" ${choisi ? "checked" : ""} aria-label="Ajouter au coupon" data-prendre>
+      <span class="match"><span class="rang">#${rang}</span> ${esc(pr.dom)} – ${esc(pr.ext)} · ${esc(pr.ligue)} · ${dateFr(pr.date)}${pr.heure ? " " + esc(pr.heure) : ""}</span>
+      <span class="cb">cote BET<b>${nb(1.05 / o.p)}</b>mini ${nb(1 / o.p)}</span>
+      <span class="choix">${esc(o.lib)}</span>
+      <span class="p">prob. ${pct(o.p)}</span>
+      ${pr.options.length > 1 ? `<div class="alt">${pr.options.slice(0, 3).map((x, i) => `<button type="button" data-opt="${i}" class="${idSel(pr, x) === idSel(pr, o) ? "on" : ""}">${esc(x.lib.split(" · ").slice(-2).join(" · "))} · ${pct(x.p)}</button>`).join("")}</div>` : ""}
+    </article>`;
+  };
+  v.innerHTML = `
+    <h1>Propositions de la semaine</h1>
+    <p class="petit doux" style="margin-top:-6px">${S.examines} matchs examinés ${periode} · ${S.props.length} propositions · une seule par match, la plus probable.</p>
+    <div class="alerte">
+      <span>Coche les lignes qui t'intéressent, puis vérifie sur Betclic : <b>si la cote Betclic est au moins égale à la cote BET</b>, garde-la ; sinon décoche.</span>
+      <span>Le classement suit la probabilité, pas la valeur. Absences et fatigue ne sont pas vérifiées : jette un œil aux compositions.</span>
+    </div>
+    ${S.props.length ? liste.map((pr, i) => carte(pr, i + 1)).join("") : `<div class="vide">Aucun match à venir dans les données. Le calendrier est mis à jour le mardi et le vendredi.</div>`}
+    ${!montrerTout && S.props.length > TOP ? `<button type="button" class="bouton second" id="s-tout">Voir les ${S.props.length - TOP} autres propositions</button><div style="height:12px"></div>` : ""}
+    ${S.ecartes.length ? `<details class="replie"><summary>Matchs écartés (${S.ecartes.length})</summary>
+      <div class="carte liste-eq petit">${S.ecartes.map(x => `<span>${esc(x.dom)} – ${esc(x.ext)} <span class="doux">· ${esc(x.ligue)} ${dateFr(x.date)}</span></span><span class="doux" style="text-align:right">${esc(x.raison)}</span>`).join("")}</div></details>` : ""}`;
+  const tout = v.querySelector("#s-tout");
+  if (tout) tout.onclick = () => { etat.semaineTout = true; vueSemaine(v); };
+  v.querySelectorAll(".prop").forEach(art => {
+    const pr = S.props.find(x => x.cle === art.dataset.match);
+    const choisi = () => etat.coupon.find(c => c.match === pr.cle);
+    const optCourante = () => { const c = choisi(); return c ? pr.options.find(x => idSel(pr, x) === c.id) || pr.options[0] : pr.options[0]; };
+    art.querySelector("[data-prendre]").onchange = () => { basculerCoupon(pr, optCourante()); vueSemaineMaj(v); };
+    art.querySelectorAll("[data-opt]").forEach(btn => btn.onclick = () => {
+      const o = pr.options[Number(btn.dataset.opt)];
+      if (choisi() && idSel(pr, o) === choisi().id) return;
+      etat.coupon = etat.coupon.filter(c => c.match !== pr.cle);
+      basculerCoupon(pr, o); vueSemaineMaj(v);
+    });
+  });
+}
+// re-rendu sans perdre la position de défilement
+function vueSemaineMaj(v) { const y = window.scrollY; vueSemaine(v).then(() => { window.scrollTo(0, y); majBarreCoupon(); }); }
+
+// ------------------------------------------------------------ vue : coupon (combiné)
+function vueCoupon(v) {
+  const b = bilanCoupon(), bj = bilanJournal();
+  if (!b.n) { v.innerHTML = `<h1>Coupon</h1><div class="vide">Ton coupon est vide. Choisis des lignes dans « Semaine ».</div>`; return; }
+  v.innerHTML = `
+    <div class="ligne"><h1>Coupon · ${b.n} sélection${b.n > 1 ? "s" : ""}</h1><button type="button" class="bouton second petit" id="k-retour">‹ Semaine</button></div>
+    <section class="carte pile">
+      <ul class="jambes">${etat.coupon.map(c => `<li><span>${esc(c.lib)}<br><span class="petit doux">${esc(c.dom)} – ${esc(c.ext)} · ${dateFr(c.dateMatch)}</span></span>
+        <span style="display:flex;gap:8px;align-items:center"><span class="mono">${pct(c.p)}</span><button type="button" class="bouton second petit" data-retirer="${esc(c.id)}" aria-label="Retirer">✕</button></span></li>`).join("")}</ul>
+    </section>
+    <section class="grille2">
+      <div class="carte kpi"><span class="petit doux">Probabilité réelle</span><span class="v">${pct(b.p)}</span></div>
+      <div class="carte kpi"><span class="petit doux">Cote BET du combiné</span><span class="v" style="color:var(--vert)">${nb(b.bet)}</span></div>
+    </section>
+    ${b.n > 4 ? `<div class="alerte"><span>Plus de 4 sélections : la marge de Betclic se cumule à chaque ligne. Un combiné long perd plus souvent qu'il n'en a l'air.</span></div>` : ""}
+    <section class="carte pile">
+      <label class="champ">Cote totale affichée par Betclic<input class="chiffre" inputmode="decimal" id="k-cote" placeholder="ex. ${nb(b.bet)}"></label>
+      <div class="verdict ligne" style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><span class="badge" id="k-badge"></span><span class="petit" id="k-raison" style="color:var(--clair)"></span></div>
+      <button type="button" class="bouton" id="k-enreg" disabled>Enregistrer le combiné (papier)</button>
+      <button type="button" class="bouton second petit" id="k-vider" style="align-self:center">Vider le coupon</button>
+    </section>`;
+  const q = s => v.querySelector(s);
+  let r = null, cote = null;
+  const maj = () => {
+    cote = lireCote(q("#k-cote").value);
+    r = M.verdict({ p: b.p, cote, statut: "candidat", p0: true, contexte: false, bankroll: bj.capital, pause: bj.pause });
+    q("#k-badge").className = "badge b-" + r.code;
+    q("#k-badge").textContent = { BET: "BET", SECURISE: "SÉCURISÉ", NOBET: "NO BET", INFO: "INFO", ATTENTE: "COTE ?" }[r.code];
+    q("#k-raison").textContent = r.code === "ATTENTE" ? "Saisis la cote totale Betclic" : r.raison + (r.code === "BET" ? ` · mise ${xof(r.mise)}` : "");
+    q("#k-enreg").disabled = !cote;
+  };
+  q("#k-cote").oninput = maj; maj();
+  q("#k-retour").onclick = () => aller("semaine");
+  v.querySelectorAll("[data-retirer]").forEach(x => x.onclick = () => { etat.coupon = etat.coupon.filter(c => c.id !== x.dataset.retirer); store.ecrire("coupon", etat.coupon); vueCoupon(v); });
+  q("#k-vider").onclick = () => { if (confirm("Vider le coupon ?")) { etat.coupon = []; store.ecrire("coupon", etat.coupon); aller("semaine"); } };
+  q("#k-enreg").onclick = () => {
+    const legs = etat.coupon.map(c => ({ code: c.code, ligue: c.ligue, dom: c.dom, ext: c.ext, dateMatch: c.dateMatch, lib: c.lib, famille: c.fam,
+                                         st: c.st, side: c.side, ligne: c.ligne, cle: c.cle, p: c.p, resultat: null }));
+    etat.journal.push({
+      id: Date.now().toString(36), cree: new Date().toISOString(), type: "combine",
+      code: [...new Set(legs.map(l => l.code))].join("+"), ligue: [...new Set(legs.map(l => l.ligue))].join(", "),
+      match: `Combiné · ${legs.length} sélection${legs.length > 1 ? "s" : ""}`, dateMatch: legs.map(l => l.dateMatch).sort().pop(),
+      marche: legs.map(l => l.lib).join(" + "), famille: "Combiné", p: b.p, cote, verdict: r.code, ev: r.ev, mise: r.mise,
+      cloture: null, resultat: null, auto: false, legs,
+    });
+    if (store.ecrire("journal", etat.journal)) { etat.coupon = []; store.ecrire("coupon", etat.coupon); aller("journal"); }
+  };
 }
 
 // ------------------------------------------------------------ vue : matchs récents
@@ -427,8 +717,9 @@ function vueRecents(v) {
         <span>xG <span class="doux petit">(si affiché)</span></span><input class="chiffre" inputmode="decimal" id="m-xg-d" aria-label="xG domicile"><input class="chiffre" inputmode="decimal" id="m-xg-e" aria-label="xG extérieur">
       </div>
       <p class="erreur cache" id="m-err"></p>
-      <button class="bouton" type="button" id="m-ok">Enregistrer le match</button>
+      <button class="bouton" type="button" id="m-ok">Vérifier avant d'enregistrer</button>
     </div>
+    <div class="carte pile relecture cache" id="m-relecture"></div>
     <div id="m-liste"></div>
     <div class="carte pile"><h2>Dernier match connu par équipe</h2><div class="liste-eq petit" id="m-eq"></div></div>`;
   const q = s => v.querySelector(s);
@@ -440,7 +731,7 @@ function vueRecents(v) {
     q("#m-dom").innerHTML = opts; q("#m-ext").innerHTML = opts;
     const miens = etat.manuels.filter(m => m.code === c).sort((x, y) => y.date.localeCompare(x.date));
     q("#m-liste").innerHTML = miens.length ? `<div class="carte pile"><h2>Tes matchs saisis</h2>${miens.map(m => `
-      <div class="ligne"><span><span class="mono doux">${dateFr(m.date)}</span> ${esc(m.dom)} ${m.v.buts[0]}-${m.v.buts[1]} ${esc(m.ext)}</span>
+      <div class="ligne"><span><span class="mono doux">${dateFr(m.date)}</span> ${esc(m.dom)} ${m.v.buts[0]}-${m.v.buts[1]} ${esc(m.ext)}${m.date <= d.dernier_match ? `<br><span class="petit doux">désormais dans les données officielles : plus compté en double</span>` : ""}</span>
       <button type="button" class="bouton second petit" data-suppr="${m.id}" aria-label="Supprimer ce match">Suppr.</button></div>`).join("")}</div>` : "";
     q("#m-liste").querySelectorAll("[data-suppr]").forEach(b => b.onclick = () => {
       if (!confirm("Supprimer ce match ?")) return;
@@ -451,28 +742,139 @@ function vueRecents(v) {
       return `<span>${esc(e)}</span><span class="mono" style="color:${j !== null && j > 10 ? "var(--ambre)" : "var(--doux)"}">${dateFr(dd)}${j !== null ? " · " + j + " j" : ""}</span>`; }).join("");
   };
   q("#m-ligue").onchange = maj; maj();
-  q("#m-ok").onclick = () => {
+  const rel = q("#m-relecture");
+  const fermerRelecture = () => { rel.classList.add("cache"); rel.innerHTML = ""; q("#m-ok").classList.remove("cache"); };
+  // toute modification du formulaire annule une relecture en cours (on ne confirme jamais des chiffres périmés)
+  q("#m-form").addEventListener("input", fermerRelecture);
+  q("#m-form").addEventListener("change", fermerRelecture);
+  q("#m-ok").onclick = async () => {
     const err = q("#m-err"); err.classList.add("cache");
-    const lire = (id, dec) => { const s = q("#m-" + id).value.trim().replace(",", "."); if (s === "") return null; const x = Number(s); return isFinite(x) && x >= 0 && (dec || Number.isInteger(x)) ? x : NaN; };
-    const paire = (id, dec) => [lire(id + "-d", dec), lire(id + "-e", dec)];
-    const dom = q("#m-dom").value, ext = q("#m-ext").value, date = q("#m-date").value;
-    const v2 = { buts: paire("buts"), tirs: paire("tirs"), cadres: paire("cadres"), corners: paire("corners") };
-    const jaunes = paire("jaunes"), rouges = paire("rouges"), xg = paire("xg", true);
-    const fautes = [];
-    if (!dom || !ext || dom === ext) fautes.push("choisis deux équipes différentes");
-    if (!date || date > aujourdhui()) fautes.push("date invalide (match pas encore joué ?)");
-    for (const [k, [h, a]] of Object.entries({ ...v2, jaunes, rouges, xg })) if (Number.isNaN(h) || Number.isNaN(a)) fautes.push(k + " : nombre invalide");
-    if (v2.buts[0] === null || v2.buts[1] === null) fautes.push("le score est obligatoire");
-    for (let i = 0; i < 2; i++) if (v2.cadres[i] !== null && v2.tirs[i] !== null && v2.cadres[i] > v2.tirs[i]) fautes.push("plus de tirs cadrés que de tirs");
-    if (fautes.length) { err.textContent = "À corriger : " + [...new Set(fautes)].join(", ") + "."; err.classList.remove("cache"); return; }
-    const stats = {};
-    for (const [k, [h, a]] of Object.entries(v2)) if (h !== null && a !== null) stats[k] = [h, a];
-    if (jaunes[0] !== null && jaunes[1] !== null) stats.cartons = [jaunes[0] + (rouges[0] || 0), jaunes[1] + (rouges[1] || 0)];
-    if (xg[0] !== null && xg[1] !== null) stats.xg = xg;
-    etat.manuels.push({ id: Date.now().toString(36), code: q("#m-ligue").value, date, dom, ext, v: stats });
-    store.ecrire("manuels", etat.manuels); etat.analyse = null;
-    vueRecents(v);
+    const code = q("#m-ligue").value;
+    const d = await chargerLigue(code);
+    const champ = controlerSaisie(q, d, code);
+    if (champ.fautes.length) { err.textContent = "À corriger : " + champ.fautes.join(" · ") + "."; err.classList.remove("cache"); return; }
+    // écran de relecture : rien n'est enregistré avant « Confirmer »
+    const { dom, ext, date, stats, alertes, hauts } = champ;
+    const lignes = [["Buts", "buts"], ["Tirs", "tirs"], ["Tirs cadrés", "cadres"], ["Corners", "corners"], ["Cartons (J + R)", "cartons"], ["xG", "xg"]]
+      .filter(([, k]) => stats[k])
+      .map(([n, k]) => `<tr><td>${n}</td>${[0, 1].map(i => `<td class="${hauts.has(k + i) ? "haut" : ""}">${k === "xg" ? nb(stats[k][i], 2) : stats[k][i]}</td>`).join("")}</tr>`).join("");
+    rel.innerHTML = `
+      <div class="ligne"><h2>Relis avant d'enregistrer</h2><span class="mono petit doux">${dateFr(date)}</span></div>
+      <table><thead><tr><td></td><td><b>${esc(dom)}</b></td><td><b>${esc(ext)}</b></td></tr></thead><tbody>${lignes}</tbody></table>
+      ${alertes.length ? `<div class="avert">${alertes.map(t => `<span>⚠ ${esc(t)}</span>`).join("")}<span class="doux">Vérifie ces chiffres sur SofaScore. S'ils sont justes, confirme.</span></div>` : `<p class="petit doux" style="margin:0">Aucune valeur inhabituelle détectée.</p>`}
+      <div class="grille2"><button type="button" class="bouton second" id="m-corr">Corriger</button><button type="button" class="bouton" id="m-conf">Confirmer</button></div>`;
+    rel.classList.remove("cache"); q("#m-ok").classList.add("cache");
+    rel.scrollIntoView({ behavior: "smooth", block: "center" });
+    q("#m-corr").onclick = () => { fermerRelecture(); q("#m-buts-d").focus(); };
+    q("#m-conf").onclick = async () => {
+      // dernier contrôle des doublons (un double appui ne crée pas deux matchs)
+      if (etat.manuels.some(m => m.code === code && m.date === date && (m.dom === dom || m.ext === ext || m.dom === ext || m.ext === dom))) { fermerRelecture(); return; }
+      etat.manuels.push({ id: Date.now().toString(36), code, date, dom, ext, v: stats });
+      store.ecrire("manuels", etat.manuels); etat.analyse = null;
+      await autoRegler();
+      vueRecents(v);
+    };
   };
+}
+
+// Limites physiques : au-delà, c'est forcément une faute de frappe.
+const LIMITES = { buts: 12, tirs: 45, cadres: 25, corners: 25, jaunes: 12, rouges: 4, xg: 8 };
+const NOMS_STATS = { buts: "buts", tirs: "tirs", cadres: "tirs cadrés", corners: "corners", jaunes: "cartons jaunes", rouges: "cartons rouges", xg: "xG", cartons: "cartons" };
+
+/** Contrôle complet d'une saisie de match. Renvoie les fautes bloquantes et les alertes (valeurs inhabituelles). */
+function controlerSaisie(q, d, code) {
+  const lire = (id, dec) => { const s = q("#m-" + id).value.trim().replace(",", "."); if (s === "") return null; const x = Number(s); return isFinite(x) && x >= 0 && (dec || Number.isInteger(x)) ? x : NaN; };
+  const paire = (id, dec) => [lire(id + "-d", dec), lire(id + "-e", dec)];
+  const dom = q("#m-dom").value, ext = q("#m-ext").value, date = q("#m-date").value;
+  const v2 = { buts: paire("buts"), tirs: paire("tirs"), cadres: paire("cadres"), corners: paire("corners") };
+  const jaunes = paire("jaunes"), rouges = paire("rouges"), xg = paire("xg", true);
+  const tout = { ...v2, jaunes, rouges, xg };
+  const fautes = [], alertes = [], hauts = new Set();
+  // 1. équipes et date
+  if (!dom || !ext || dom === ext) fautes.push("choisis deux équipes différentes");
+  if (!date || date > aujourdhui()) fautes.push("date invalide (match pas encore joué ?)");
+  else if (date <= d.dernier_match) fautes.push(`ce match est déjà dans les données officielles (à jour jusqu'au ${dateFr(d.dernier_match)}) : inutile de le saisir`);
+  else if (jours(date, aujourdhui()) > 60) alertes.push("match joué il y a plus de 60 jours : es-tu sûr de la date ?");
+  // 2. doublons
+  if (dom && ext && date) {
+    if (etat.manuels.some(m => m.code === code && m.date === date && m.dom === dom && m.ext === ext)) fautes.push("ce match est déjà saisi");
+    else for (const eq of [dom, ext]) if (etat.manuels.some(m => m.code === code && m.date === date && (m.dom === eq || m.ext === eq)))
+      fautes.push(`${eq} a déjà un match saisi le ${dateFr(date)}`);
+  }
+  // 3. nombres valides et limites physiques
+  for (const [k, hv] of Object.entries(tout)) {
+    if (hv.some(Number.isNaN)) { fautes.push(`${NOMS_STATS[k]} : nombre invalide${k === "xg" ? "" : " (entier attendu)"}`); continue; }
+    if (hv.some(x => x !== null && x > LIMITES[k])) fautes.push(`${NOMS_STATS[k]} : plus de ${LIMITES[k]}, impossible`);
+    if ((hv[0] === null) !== (hv[1] === null)) fautes.push(`${NOMS_STATS[k]} : remplis les deux équipes ou aucune`);
+  }
+  if (v2.buts[0] === null || v2.buts[1] === null) fautes.push("le score est obligatoire");
+  for (let i = 0; i < 2; i++) {
+    if (v2.cadres[i] !== null && v2.tirs[i] !== null && v2.cadres[i] > v2.tirs[i]) fautes.push("plus de tirs cadrés que de tirs");
+    if (rouges[i] !== null && jaunes[i] === null) fautes.push("cartons rouges sans cartons jaunes : remplis aussi les jaunes (0 si aucun)");
+  }
+  const stats = {};
+  for (const [k, [h, a]] of Object.entries(v2)) if (h !== null && a !== null) stats[k] = [h, a];
+  if (jaunes[0] !== null && jaunes[1] !== null) stats.cartons = [jaunes[0] + (rouges[0] || 0), jaunes[1] + (rouges[1] || 0)];
+  if (xg[0] !== null && xg[1] !== null) stats.xg = xg;
+  if (fautes.length) return { fautes: [...new Set(fautes)] };
+  // 4. cohérences probables (alertes, pas des blocages : un but contre son camp n'est pas un tir cadré)
+  for (let i = 0; i < 2; i++) {
+    if (stats.cadres && stats.buts[i] > stats.cadres[i]) { alertes.push(`${i ? ext : dom} : plus de buts (${stats.buts[i]}) que de tirs cadrés (${stats.cadres[i]})`); hauts.add("buts" + i); }
+    if (stats.tirs && stats.tirs[i] === 0) { alertes.push(`${i ? ext : dom} : zéro tir, c'est très rare`); hauts.add("tirs" + i); }
+  }
+  // 5. valeurs inhabituelles par rapport à la moyenne de l'équipe (même lieu)
+  for (const [k, hv] of Object.entries(stats)) {
+    hv.forEach((val, i) => {
+      const eq = i ? ext : dom, cle = i ? "pour_ext" : "pour_dom";
+      const s = ((d.equipes[eq] || {})[k] || {})[cle];
+      if (!s || s[1] < 3) return;
+      const moy = s[0] / s[1], marge = k === "xg" ? 1.5 : 3;
+      if (val > 2 * moy + marge) { alertes.push(`${eq} : ${nb(val, k === "xg" ? 2 : 0)} ${NOMS_STATS[k]}, sa moyenne est de ${nb(moy, 1)}`); hauts.add(k + i); }
+    });
+  }
+  return { fautes: [], alertes, hauts, dom, ext, date, stats };
+}
+
+// ------------------------------------------------------------ règlement automatique des paris
+/**
+ * Règle les paris non résolus dès que le match correspondant est connu :
+ * d'abord tes matchs saisis, ensuite (si l'export les publie) les résultats officiels.
+ * Ne touche jamais un résultat que tu as choisi toi-même.
+ */
+async function autoRegler() {
+  const ouverts = etat.journal.filter(p => !p.resultat && p.cle && p.dom && p.ext);
+  const combines = etat.journal.filter(p => !p.resultat && Array.isArray(p.legs));
+  if (!ouverts.length && !combines.length) return 0;
+  const codes = new Set(ouverts.map(p => p.code));
+  for (const c of combines) for (const l of c.legs) codes.add(l.code);
+  const sources = {};
+  for (const code of codes) {
+    sources[code] = etat.manuels.filter(m => m.code === code);
+    try { const d = await chargerLigue(code); if (Array.isArray(d.resultats)) sources[code] = sources[code].concat(d.resultats); } catch (_) { /* données absentes : on garde les matchs saisis */ }
+  }
+  let n = 0;
+  for (const p of ouverts) {
+    const m = sources[p.code].find(x => x.dom === p.dom && x.ext === p.ext && Math.abs(jours(x.date, p.dateMatch)) <= 1);
+    if (!m) continue;
+    const r = M.reglerPari(p, m.v);
+    if (!r) continue;
+    p.resultat = r; p.auto = true; n++;
+  }
+  // combinés : chaque sélection est réglée, puis le combiné (perdu dès qu'une ligne perd)
+  for (const c of combines) {
+    for (const l of c.legs) {
+      if (l.resultat) continue;
+      const m = sources[l.code].find(x => x.dom === l.dom && x.ext === l.ext && Math.abs(jours(x.date, l.dateMatch)) <= 1);
+      const r = m ? M.reglerPari(l, m.v) : null;
+      if (r) { l.resultat = r; n++; }
+    }
+    const res = c.legs.map(l => l.resultat);
+    if (res.includes("perdu")) { c.resultat = "perdu"; c.auto = true; n++; }
+    else if (res.every(x => x === "gagne")) { c.resultat = "gagne"; c.auto = true; n++; }
+    // une ligne remboursée : la cote du combiné change, c'est à toi de régler à la main
+  }
+  if (n) store.ecrire("journal", etat.journal);
+  return n;
 }
 
 // ------------------------------------------------------------ vue : journal
@@ -504,14 +906,18 @@ function vueJournal(v) {
       <div class="grille2"><button type="button" class="bouton second petit" id="j-exp">Sauvegarder</button><label class="bouton second petit" style="cursor:pointer">Restaurer<input type="file" accept="application/json" id="j-imp" class="cache"></label></div>
     </section>
     <h2 style="margin:18px 0 10px">Paris enregistrés (${entrees.length})</h2>
+    ${(() => { const att = entrees.filter(p => !p.resultat && p.dateMatch && p.dateMatch < aujourdhui()).length;
+      return att ? `<p class="petit doux" style="margin:-4px 0 12px">${att} pari${att > 1 ? "s" : ""} joué${att > 1 ? "s" : ""} sans résultat : saisis le match dans « Matchs récents », il sera réglé tout seul (sauf cartons).</p>` : ""; })()}
     ${entrees.length ? entrees.map(p => `
       <article class="carte pari" data-id="${p.id}">
         <div class="ligne"><b>${esc(p.match)}</b><span class="badge b-${p.verdict}">${{ BET: "BET", SECURISE: "SÉCURISÉ", NOBET: "NO BET", INFO: "INFO", ATTENTE: "—" }[p.verdict] || p.verdict}</span></div>
-        <span class="petit" style="color:var(--clair)">${esc(p.marche)} · prob. ${pct(p.p)} · prise à <span class="mono">${nb(p.cote)}</span>${p.mise ? " · mise " + xof(p.mise) : ""}</span>
+        ${Array.isArray(p.legs) ? `<ul class="jambes">${p.legs.map(l => `<li><span>${esc(l.lib)}<br><span class="petit doux">${esc(l.dom)} – ${esc(l.ext)} · ${dateFr(l.dateMatch)}</span></span><span class="mono">${{ gagne: "✅", perdu: "❌", rembourse: "↩︎" }[l.resultat] || pct(l.p)}</span></li>`).join("")}</ul>
+        <span class="petit" style="color:var(--clair)">prob. ${pct(p.p)} · prise à <span class="mono">${nb(p.cote)}</span>${p.mise ? " · mise " + xof(p.mise) : ""}${p.legs.some(l => l.resultat === "rembourse") && !p.resultat ? " · une ligne remboursée : règle à la main avec la cote recalculée par Betclic" : ""}</span>`
+        : `<span class="petit" style="color:var(--clair)">${esc(p.marche)} · prob. ${pct(p.p)} · prise à <span class="mono">${nb(p.cote)}</span>${p.mise ? " · mise " + xof(p.mise) : ""}</span>`}
         <span class="petit doux">${esc(p.ligue)} · ${dateFr(p.dateMatch)}${p.cloture ? ` · CLV <span class="mono">${(p.cote / p.cloture - 1 >= 0 ? "+" : "") + nb(100 * (p.cote / p.cloture - 1), 1)} %</span>` : ""}</span>
         <div class="grille2">
           <label class="champ" style="font-size:11px">Cote de clôture<input class="chiffre" inputmode="decimal" data-clot value="${p.cloture ? nb(p.cloture) : ""}" placeholder="juste avant le match"></label>
-          <label class="champ" style="font-size:11px">Résultat<select data-res><option value="">—</option><option value="gagne" ${p.resultat === "gagne" ? "selected" : ""}>Gagné</option><option value="perdu" ${p.resultat === "perdu" ? "selected" : ""}>Perdu</option><option value="rembourse" ${p.resultat === "rembourse" ? "selected" : ""}>Remboursé</option></select></label>
+          <label class="champ" style="font-size:11px">Résultat${p.auto ? ' <span class="auto">· réglé auto</span>' : ""}<select data-res><option value="">—</option><option value="gagne" ${p.resultat === "gagne" ? "selected" : ""}>Gagné</option><option value="perdu" ${p.resultat === "perdu" ? "selected" : ""}>Perdu</option><option value="rembourse" ${p.resultat === "rembourse" ? "selected" : ""}>Remboursé</option></select></label>
         </div>
         <button type="button" class="bouton second petit" data-del style="align-self:flex-end">Supprimer</button>
       </article>`).join("") : `<div class="vide">Aucun pari pour l'instant. Analyse un match, saisis la cote Betclic, puis « Enregistrer ».</div>`}`;
@@ -533,7 +939,7 @@ function vueJournal(v) {
   v.querySelectorAll(".pari").forEach(art => {
     const p = etat.journal.find(x => x.id === art.dataset.id);
     art.querySelector("[data-clot]").onchange = e => { p.cloture = lireCote(e.target.value); store.ecrire("journal", etat.journal); vueJournal(v); };
-    art.querySelector("[data-res]").onchange = e => { p.resultat = e.target.value || null; store.ecrire("journal", etat.journal); vueJournal(v); };
+    art.querySelector("[data-res]").onchange = e => { p.resultat = e.target.value || null; p.auto = false; store.ecrire("journal", etat.journal); vueJournal(v); };
     art.querySelector("[data-del]").onclick = () => { if (confirm("Supprimer ce pari du journal ?")) { etat.journal = etat.journal.filter(x => x.id !== p.id); store.ecrire("journal", etat.journal); vueJournal(v); } };
   });
 }
@@ -542,6 +948,7 @@ function vueJournal(v) {
 (async () => {
   aller(etat.vue);
   await chargerIndex();
+  if (etat.index) await autoRegler();
   rendre();
 })();
 </script>
