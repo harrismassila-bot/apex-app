@@ -83,8 +83,8 @@ table.att td:first-child{font-family:var(--sans)}
 .issue .mini{font-size:12px;color:var(--doux)}
 .issue .verdict{grid-column:1 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--clair)}
 .issue .verdict .enreg{margin-left:auto}
-.onglets{position:fixed;left:0;right:0;bottom:0;background:var(--barre);border-top:1px solid var(--trait);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);z-index:5}
-.onglets button{min-height:62px;border:0;background:transparent;color:var(--doux);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.onglets{position:fixed;left:0;right:0;bottom:0;background:var(--barre);border-top:1px solid var(--trait);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.onglets button{min-height:62px;border:0;background:transparent;color:var(--doux);font-size:10.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .onglets button[aria-current=page]{color:var(--vert)}
 body.avec-coupon{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
 .barre-coupon{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom));z-index:6;padding:0 12px 8px}
@@ -157,6 +157,8 @@ details.replie[open]>summary::after{content:"▴"}
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
   <button type="button" data-vue="semaine">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Semaine</button>
+  <button type="button" data-vue="europe">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>Europe</button>
   <button type="button" data-vue="analyser">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Analyser</button>
   <button type="button" data-vue="recents">
@@ -246,7 +248,7 @@ function rendre() {
   const v = document.getElementById("vue");
   if (etat.erreur) { v.innerHTML = `<div class="alerte">${esc(etat.erreur)}</div>`; return; }
   if (!etat.index) { v.innerHTML = `<div class="vide">Chargement des données…</div>`; return; }
-  ({ accueil: vueAccueil, semaine: vueSemaine, coupon: vueCoupon, analyser: vueAnalyser, recents: vueRecents, journal: vueJournal }[etat.vue] || vueAccueil)(v);
+  ({ accueil: vueAccueil, semaine: vueSemaine, coupon: vueCoupon, europe: vueEurope, analyser: vueAnalyser, recents: vueRecents, journal: vueJournal }[etat.vue] || vueAccueil)(v);
   majBarreCoupon();
 }
 
@@ -258,7 +260,11 @@ function vueAccueil(v) {
     return `<div class="ligne"><span>${esc(l.ligue)}${l.teste ? "" : ' <span class="doux petit">· non testée</span>'}</span>
       <span class="mono ${retard > 14 ? "" : "doux"}" style="${retard > 14 ? "color:var(--ambre)" : ""}">jusqu'au ${dateFr(l.dernier_match)}</span></div>`;
   }).join("");
+  const testees = etat.index.ligues.filter(l => l.teste);
+  const retardMax = testees.length ? Math.max(...testees.map(l => jours(l.dernier_match, aujourdhui()))) : 0;
+  const alerteRetard = retardMax > 10 ? `<div class="alerte"><span><b>Données en retard de ${retardMax} jours</b> (source football-data.co.uk). Les matchs des équipes sans résultat récent sont écartés (porte P0) : peu de propositions tant que la source n'a pas rattrapé.</span></div>` : "";
   v.innerHTML = `
+    ${alerteRetard}
     <button class="bouton" type="button" id="go-sem">Propositions de la semaine</button>
     <div style="height:10px"></div>
     <button class="bouton second" type="button" id="go">Analyser un match précis</button>
@@ -549,7 +555,9 @@ function propositionsMatch(d, code, mt) {
     }
     if (meilleur) { meilleur.grille = grilleLignes(a, b); res.push(meilleur); }
   }
-  return res.sort((x, y) => y.p - x.p);
+  res.sort((x, y) => y.p - x.p);
+  res.p1n2 = a.prob1n2;                 // pour l'affichage « victoire directe » (information)
+  return res;
 }
 
 /*
@@ -593,11 +601,28 @@ async function calculerSemaine() {
       if (vieux.length) { ecartes.push({ ...base, raison: `P0 : données de ${vieux.join(" et ")} trop anciennes` }); continue; }
       const options = propositionsMatch(d, l.code, mt);
       if (!options.length) { ecartes.push({ ...base, raison: "aucune ligne validée entre 60 et 80 %" }); continue; }
-      props.push({ ...base, cle: `${l.code}|${mt.date}|${mt.dom}|${mt.ext}`, options });
+      props.push({ ...base, cle: `${l.code}|${mt.date}|${mt.dom}|${mt.ext}`, options,
+                   p1n2: options.p1n2, cotes: mt.cotes_1n2 || null, sourceCotes: mt.source_cotes || "" });
     }
   }
   props.sort((x, y) => y.options[0].p - x.options[0].p);
   return (etat.semaine = { cle: cleCache, props, ecartes, examines });
+}
+
+/**
+ * Victoire directe, en INFORMATION seulement : test du 12/10/2026 (5 ligues, 3 saisons) =
+ * favoris ≥ 60 % avec filtre APEX : ROI +0,6 % à la clôture Pinnacle, sous le seuil de +3 %.
+ * On montre donc le favori avec l'avis d'APEX et celui du marché, sans jamais dire BET.
+ */
+function ligneVictoire(pr) {
+  if (!pr.p1n2) return "";
+  let mk = null;
+  if (pr.cotes) { const inv = pr.cotes.map(c => 1 / c), t = inv[0] + inv[1] + inv[2]; mk = { "1": inv[0] / t, "N": inv[1] / t, "2": inv[2] / t }; }
+  const ref = mk || pr.p1n2;
+  const fav = ref["1"] >= ref["2"] ? "1" : "2", nom = fav === "1" ? pr.dom : pr.ext;
+  const accord = mk ? (Math.abs(pr.p1n2[fav] - mk[fav]) <= 0.05 ? "d'accord" : pr.p1n2[fav] > mk[fav] ? "APEX plus confiant" : "APEX moins confiant") : "";
+  return `<div class="grille"><div class="t">Victoire directe · <span class="badge b-INFO" style="padding:1px 6px">INFO</span></div>
+    <span class="petit" style="color:var(--clair)">Favori ${esc(nom)} : APEX ${pct(pr.p1n2[fav])}${mk ? ` · marché ${pct(mk[fav])} (${esc(pr.sourceCotes)}) · ${accord}` : " · cotes du marché pas encore publiées"}</span></div>`;
 }
 
 const idSel = (pr, o) => `${pr.cle}|${o.st}|${o.side}|${o.ligne}|${o.cle}`;
@@ -646,6 +671,7 @@ async function vueSemaine(v) {
       <span class="cb">cote BET<b>${nb(1.05 / o.p)}</b>mini ${nb(1 / o.p)}</span>
       <span class="choix">${esc(o.lib)}</span>
       <span class="p">prob. ${pct(o.p)}</span>
+      ${ligneVictoire(pr)}
       ${o.grille && o.grille.length ? `<div class="grille"><div class="t">Trouve la ligne de Betclic · cote BET APEX (plus / moins)</div><div class="rang2">${o.grille.map(g => `<span class="c ${g.ligne === o.ligne ? "on" : ""}"><b>${nb(g.ligne, 1)}</b>+ ${g.plus ? nb(g.plus) : "—"}<br>− ${g.moins ? nb(g.moins) : "—"}</span>`).join("")}</div></div>` : ""}
       ${pr.options.length > 1 ? `<div class="alt">${pr.options.slice(0, 3).map((x, i) => `<button type="button" data-opt="${i}" class="${idSel(pr, x) === idSel(pr, o) ? "on" : ""}">${esc(x.lib.split(" · ").slice(-2).join(" · "))} · ${pct(x.p)}</button>`).join("")}</div>` : ""}
     </article>`;
@@ -728,6 +754,156 @@ function vueCoupon(v) {
     });
     if (store.ecrire("journal", etat.journal)) { etat.coupon = []; store.ecrire("coupon", etat.coupon); aller("journal"); }
   };
+}
+
+// ------------------------------------------------------------ vue : coupes d'Europe (information)
+/*
+ * Zone Europe : met côte à côte le profil des deux clubs dans LEUR championnat, et le contexte
+ * propre aux coupes (enjeu du classement, voyage, rotation). Aucune probabilité ni BET :
+ * le passage d'un championnat à l'autre n'est pas encore calibré (catégorie D, non validée).
+ */
+const COUPES = {
+  ldc: { nom: "Ligue des Champions", matchs: 8, regle: "36 clubs, 8 matchs de phase de ligue (4 à domicile, 4 à l'extérieur). 1er-8e : qualifiés directement pour les 8es. 9e-24e : barrages. 25e-36e : éliminés." },
+  el:  { nom: "Europa League", matchs: 8, regle: "36 clubs, 8 matchs de phase de ligue. 1er-8e : 8es de finale. 9e-24e : barrages. 25e-36e : éliminés." },
+  ecl: { nom: "Conference League", matchs: 6, regle: "36 clubs, 6 matchs de phase de ligue (un adversaire par chapeau, jamais du même pays). 1er-8e : 8es. 9e-24e : barrages. 25e-36e : éliminés." },
+};
+const ENJEUX = {
+  ligue: [["top8", "Vise le top 8 (8es directs)", 1], ["barrages", "Se bat pour la zone 9-24 (barrages)", 1], ["menace", "Menacé d'élimination (25e-36e)", 1],
+          ["acquis", "Qualification déjà assurée", -1], ["elimine", "Déjà éliminé", -1], ["inconnu", "Début de phase / enjeu flou", 0]],
+  ko:    [["retard", "Doit remonter un retard (retour)", 1], ["avance", "Défend une avance (retour)", 0], ["aller", "Match aller", 0]],
+};
+
+function profilEquipe(d, code, eq, dom, jour) {
+  const manuels = etat.manuels.filter(m => m.code === code);
+  const F = M.construireForces(d, manuels, jour);
+  const f = F.equipes[eq] || {};
+  const lieu = dom ? ["pour_dom", "contre_dom"] : ["pour_ext", "contre_ext"];
+  const indice = (s, i) => {                       // force de l'équipe ÷ moyenne de la ligue au même lieu
+    const L = F.ligue[s], x = (f[s] || {})[lieu[i]];
+    if (!L || !x) return null;
+    const ref = (dom ? [L[0], L[1]] : [L[1], L[0]])[i];
+    return ref > 0 ? x[0] / ref : null;
+  };
+  const c = (d.classement || {})[eq] || null;
+  return {
+    eq, code, ligue: d.ligue, rangUefa: d.rang_uefa, nbEquipes: Object.keys(d.classement || {}).length,
+    classement: c, dernier: dernierConnu(d, code, eq),
+    att: indice("buts", 0), def: indice("buts", 1), tirs: indice("tirs", 0), cadres: indice("cadres", 0),
+    corners: indice("corners", 0), tirsConcedes: indice("tirs", 1),
+  };
+}
+
+/** Lecture du contexte : règles simples, déterministes, écrites à l'avance (non testées). */
+function lireContexte(p, ctx, phase) {
+  const s = [];
+  let score = 0;
+  if (p.classement) {
+    const v = (p.classement.forme.match(/V/g) || []).length, dd = (p.classement.forme.match(/D/g) || []).length;
+    if (p.classement.forme.length >= 4 && v >= 4) { s.push(["+", `En forme en championnat (${p.classement.forme})`]); score++; }
+    else if (p.classement.forme.length >= 4 && dd >= 3) { s.push(["−", `En difficulté en championnat (${p.classement.forme})`]); score--; }
+    if (p.nbEquipes && p.classement.rang > p.nbEquipes - 3) { s.push(["−", `Zone de relégation (${p.classement.rang}e) : le championnat peut passer avant l'Europe`]); score--; }
+    if (p.classement.rang <= 3) s.push(["i", `Haut de tableau en championnat (${p.classement.rang}e)`]);
+  }
+  const enjeu = (ENJEUX[phase === "ligue" ? "ligue" : "ko"].find(e => e[0] === ctx.enjeu) || [null, null, 0]);
+  if (enjeu[1]) { s.push([enjeu[2] > 0 ? "+" : enjeu[2] < 0 ? "−" : "i", `Enjeu : ${enjeu[1].toLowerCase()}`]); score += enjeu[2]; }
+  if (ctx.voyage) { s.push(["−", "Long déplacement (plus de 3 h de vol ou décalage horaire)"]); score--; }
+  if (ctx.rotation) { s.push(["−", "Gros match de championnat dans les 72 h : rotation probable"]); score--; }
+  if (ctx.absent) { s.push(["−", "Absent important"]); score--; }
+  const j = p.dernier ? jours(p.dernier, etat.europe.date) : null;
+  if (j === null || j > P0_JOURS) s.push(["!", `Données trop anciennes (dernier match connu ${dateFr(p.dernier)}) : profil peu fiable`]);
+  return { signaux: s, score };
+}
+
+function vueEurope(v) {
+  const E = etat.europe = etat.europe || store.lire("europe", { coupe: "ldc", phase: "ligue", date: aujourdhui(), a: { code: "SP1", eq: "" }, b: { code: "E0", eq: "" }, ctxA: {}, ctxB: {} });
+  if (!E.date) E.date = aujourdhui();
+  const optsLigues = sel => etat.index.ligues.map(l => `<option value="${l.code}" ${l.code === sel ? "selected" : ""}>${esc(l.ligue)}</option>`).join("");
+  const ctxBloc = (k) => {
+    const c = E[k], liste = ENJEUX[E.phase === "ligue" ? "ligue" : "ko"];
+    return `<label class="champ">Enjeu européen<select data-enjeu="${k}"><option value="">— choisir —</option>${liste.map(([id, t]) => `<option value="${id}" ${c.enjeu === id ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+      ${[["voyage", "Long voyage / décalage horaire"], ["rotation", "Gros match de championnat dans les 72 h"], ["absent", "Absent important"]]
+        .map(([id, t]) => `<label class="coche">${t}<input type="checkbox" data-c="${k}" data-k="${id}" ${c[id] ? "checked" : ""}></label>`).join("")}`;
+  };
+  v.innerHTML = `
+    <h1>Coupes d'Europe</h1>
+    <p class="petit doux" style="margin-top:-6px">Profil des deux clubs dans leur championnat, et contexte européen. Information seulement : aucun BET tant que cette zone n'est pas validée.</p>
+    <div class="pile">
+      <div class="grille2">
+        <label class="champ">Compétition<select id="e-coupe">${Object.entries(COUPES).map(([k, c]) => `<option value="${k}" ${E.coupe === k ? "selected" : ""}>${c.nom}</option>`).join("")}</select></label>
+        <label class="champ">Phase<select id="e-phase"><option value="ligue" ${E.phase === "ligue" ? "selected" : ""}>Phase de ligue</option><option value="ko" ${E.phase === "ko" ? "selected" : ""}>Élimination directe</option></select></label>
+      </div>
+      <label class="champ">Date du match<input type="date" id="e-date" value="${esc(E.date)}"></label>
+      <section class="carte pile"><h2>Domicile</h2>
+        <label class="champ">Championnat<select id="e-la">${optsLigues(E.a.code)}</select></label>
+        <label class="champ">Club<select id="e-ea"><option>Chargement…</option></select></label>
+        <div class="carte" style="padding:12px 14px 0;margin:0">${ctxBloc("ctxA")}</div></section>
+      <section class="carte pile"><h2>Extérieur</h2>
+        <label class="champ">Championnat<select id="e-lb">${optsLigues(E.b.code)}</select></label>
+        <label class="champ">Club<select id="e-eb"><option>Chargement…</option></select></label>
+        <div class="carte" style="padding:12px 14px 0;margin:0">${ctxBloc("ctxB")}</div></section>
+      <p class="petit doux" style="margin:0">Club absent de la liste ? Son championnat n'est pas couvert par nos données gratuites : pas de profil possible.</p>
+      <button class="bouton" type="button" id="e-go">Comparer les deux clubs</button>
+      <p class="erreur cache" id="e-err"></p>
+    </div>
+    <div id="e-res" style="margin-top:18px"></div>`;
+  const q = s => v.querySelector(s);
+  const sauver = () => store.ecrire("europe", E);
+  const remplir = async (cote) => {
+    const k = cote === "a" ? "a" : "b", selL = q(cote === "a" ? "#e-la" : "#e-lb"), selE = q(cote === "a" ? "#e-ea" : "#e-eb");
+    E[k].code = selL.value;
+    try { const d = await chargerLigue(E[k].code);
+      const eqs = Object.keys(d.equipes).sort((x, y) => x.localeCompare(y));
+      selE.innerHTML = `<option value="">— choisir —</option>` + eqs.map(e => `<option ${e === E[k].eq ? "selected" : ""}>${esc(e)}</option>`).join("");
+    } catch (e) { selE.innerHTML = `<option value="">données indisponibles</option>`; }
+  };
+  q("#e-la").onchange = () => { E.a.eq = ""; remplir("a"); sauver(); };
+  q("#e-lb").onchange = () => { E.b.eq = ""; remplir("b"); sauver(); };
+  q("#e-coupe").onchange = () => { E.coupe = q("#e-coupe").value; sauver(); };
+  q("#e-phase").onchange = () => { E.phase = q("#e-phase").value; E.ctxA.enjeu = E.ctxB.enjeu = ""; sauver(); vueEurope(v); };
+  q("#e-date").onchange = () => { E.date = q("#e-date").value || aujourdhui(); sauver(); };
+  v.querySelectorAll("[data-enjeu]").forEach(s => s.onchange = () => { E[s.dataset.enjeu].enjeu = s.value; sauver(); });
+  v.querySelectorAll("[data-c]").forEach(x => x.onchange = () => { E[x.dataset.c][x.dataset.k] = x.checked; sauver(); });
+  remplir("a"); remplir("b");
+  q("#e-go").onclick = async () => {
+    E.a.eq = q("#e-ea").value; E.b.eq = q("#e-eb").value; sauver();
+    const err = q("#e-err");
+    if (!E.a.eq || !E.b.eq || (E.a.eq === E.b.eq && E.a.code === E.b.code)) { err.textContent = "Choisis deux clubs différents."; err.classList.remove("cache"); return; }
+    err.classList.add("cache");
+    const [da, db] = await Promise.all([chargerLigue(E.a.code), chargerLigue(E.b.code)]);
+    rendreEurope(q("#e-res"), profilEquipe(da, E.a.code, E.a.eq, true, E.date), profilEquipe(db, E.b.code, E.b.eq, false, E.date));
+    q("#e-res").scrollIntoView({ behavior: "smooth" });
+  };
+}
+
+function rendreEurope(zone, A, B) {
+  const E = etat.europe, coupe = COUPES[E.coupe];
+  const ca = lireContexte(A, E.ctxA, E.phase), cb = lireContexte(B, E.ctxB, E.phase);
+  const ind = x => x === null ? "—" : "×" + nb(x, 2);
+  const couleur = (x, bas) => x === null ? "" : (bas ? x < 0.9 : x > 1.1) ? "color:var(--vert)" : (bas ? x > 1.1 : x < 0.9) ? "color:var(--ambre)" : "";
+  const ligne = (nom, a, b, bas) => `<tr><td>${nom}</td><td style="${couleur(a, bas)}">${ind(a)}</td><td style="${couleur(b, bas)}">${ind(b)}</td></tr>`;
+  const fiche = (p, lieu) => `<div class="carte pile">
+      <div class="ligne"><b>${esc(p.eq)}</b><span class="petit doux">${lieu}</span></div>
+      <span class="petit doux">${esc(p.ligue)}${p.rangUefa ? ` · championnat n° ${p.rangUefa} au classement UEFA` : " · rang UEFA non repris"}</span>
+      ${p.classement ? `<div class="ligne petit"><span>${p.classement.rang}e sur ${p.nbEquipes} · ${p.classement.pts} pts en ${p.classement.j} matchs · ${p.classement.bp}-${p.classement.bc}</span>
+        <span class="mono">${p.classement.forme.split("").map(r => `<span style="color:${r === "V" ? "var(--vert)" : r === "D" ? "var(--rouge)" : "var(--doux)"}">${r}</span>`).join("")}</span></div>` : `<span class="petit doux">Classement indisponible</span>`}
+    </div>`;
+  const signaux = (c) => c.signaux.length ? `<ul class="jambes">${c.signaux.map(([t, x]) => `<li><span>${{ "+": "🟢", "−": "🟠", "i": "⚪", "!": "⚠️" }[t]} ${esc(x)}</span></li>`).join("")}</ul>` : `<span class="petit doux">Aucun signal particulier.</span>`;
+  const ecartNiveau = A.rangUefa && B.rangUefa && Math.abs(A.rangUefa - B.rangUefa) >= 3;
+  const diff = ca.score - cb.score;
+  zone.innerHTML = `
+    <div class="carte pile"><div class="ligne"><h2>${esc(coupe.nom)}</h2><span class="badge b-INFO">INFO</span></div>
+      <p class="petit" style="margin:0;color:var(--clair)">${esc(coupe.regle)}</p></div>
+    ${fiche(A, "domicile")}${fiche(B, "extérieur")}
+    <div class="carte"><h2 style="margin-bottom:6px">Niveau en championnat (1 = moyenne de sa ligue)</h2>
+      <table class="att"><thead><tr><th></th><th>${esc(A.eq)} (dom.)</th><th>${esc(B.eq)} (ext.)</th></tr></thead><tbody>
+      ${ligne("Attaque (buts marqués)", A.att, B.att)}${ligne("Défense (buts encaissés)", A.def, B.def, true)}
+      ${ligne("Tirs", A.tirs, B.tirs)}${ligne("Tirs cadrés", A.cadres, B.cadres)}${ligne("Tirs concédés", A.tirsConcedes, B.tirsConcedes, true)}${ligne("Corners", A.corners, B.corners)}
+      </tbody></table>
+      <p class="petit doux" style="margin:8px 0 0">Vert = au-dessus de sa ligue, orange = en dessous. ${ecartNiveau ? `<b style="color:var(--ambre)">Attention : les deux championnats n'ont pas le même niveau (UEFA n° ${A.rangUefa} contre n° ${B.rangUefa}) : un ×1,3 dans le plus faible vaut moins qu'un ×1,3 dans le plus fort.</b>` : "Indices relatifs à chaque championnat : à comparer avec prudence entre ligues différentes."}</p></div>
+    <div class="carte pile"><h2>Contexte · ${esc(A.eq)}</h2>${signaux(ca)}</div>
+    <div class="carte pile"><h2>Contexte · ${esc(B.eq)}</h2>${signaux(cb)}</div>
+    <div class="alerte"><span><b>Lecture :</b> ${diff >= 2 ? `contexte nettement plus favorable à ${esc(A.eq)}` : diff <= -2 ? `contexte nettement plus favorable à ${esc(B.eq)}` : "contexte équilibré entre les deux clubs"} (score ${ca.score} contre ${cb.score}).</span>
+      <span>Information seulement : ces règles de contexte ne sont pas encore validées par un backtest, et APEX ne calcule pas encore de probabilités pour les matchs européens (pas de données européennes gratuites pour calibrer). Aucun BET.</span></div>`;
 }
 
 // ------------------------------------------------------------ vue : matchs récents
@@ -908,6 +1084,21 @@ async function autoRegler() {
   return n;
 }
 
+// ------------------------------------------------------------ bilan texte (partage)
+function texteBilan() {
+  const b = bilanJournal(), f = x => x === null ? "—" : (x >= 0 ? "+" : "") + nb(100 * x, 1) + " %";
+  const res = { gagne: "GAGNÉ", perdu: "PERDU", rembourse: "REMBOURSÉ" };
+  const lignes = [`BILAN APEX du ${dateFr(aujourdhui())} (mode papier)`,
+    `BET résolus ${b.resolus}/200 · ROI ${f(b.roi)} · CLV ${f(b.clv)} · drawdown max ${nb(100 * b.ddMax, 1)} % · capital ${xof(b.capital)}`, ""];
+  const tri = [...etat.journal].sort((x, y) => (x.dateMatch || "").localeCompare(y.dateMatch || ""));
+  for (const p of tri) {
+    lignes.push(`${dateFr(p.dateMatch)} | ${p.ligue} | ${p.match} | ${p.marche} | APEX ${pct(p.p)} | cote ${nb(p.cote)}${p.cloture ? " (clôture " + nb(p.cloture) + ")" : ""} | ${p.verdict}${p.mise ? " " + xof(p.mise) : ""}${p.desaccord ? " | garde-fou désaccord" : ""} | ${res[p.resultat] || "en attente"}${p.auto ? " (auto)" : ""}`);
+    if (Array.isArray(p.legs)) for (const l of p.legs) lignes.push(`   · ${l.lib} (${l.dom} – ${l.ext}) ${pct(l.p)} → ${res[l.resultat] || "en attente"}`);
+  }
+  if (!etat.journal.length) lignes.push("Aucun pari enregistré.");
+  return lignes.join("\n");
+}
+
 // ------------------------------------------------------------ vue : journal
 function vueJournal(v) {
   const b = bilanJournal();
@@ -934,6 +1125,7 @@ function vueJournal(v) {
     <section class="carte pile">
       <label class="champ">Bankroll papier de départ (XOF)<input class="chiffre" inputmode="numeric" id="j-bk" value="${etat.bankroll}"></label>
       <div class="ligne petit"><span class="doux">Capital papier actuel</span><span class="mono">${xof(b.capital)}</span></div>
+      <button type="button" class="bouton petit" id="j-partage" style="width:100%">Partager le bilan (à coller dans la discussion avec Claude)</button>
       <div class="grille2"><button type="button" class="bouton second petit" id="j-exp">Sauvegarder</button><label class="bouton second petit" style="cursor:pointer">Restaurer<input type="file" accept="application/json" id="j-imp" class="cache"></label></div>
     </section>
     ${(() => { const d = etat.journal.filter(p => p.desaccord && p.resultat && p.resultat !== "rembourse");
@@ -958,6 +1150,13 @@ function vueJournal(v) {
       </article>`).join("") : `<div class="vide">Aucun pari pour l'instant. Analyse un match, saisis la cote Betclic, puis « Enregistrer ».</div>`}`;
   const q = s => v.querySelector(s);
   q("#j-bk").onchange = () => { const x = Number(q("#j-bk").value.replace(/\s/g, "")); if (x > 0) { etat.bankroll = x; store.ecrire("bankroll", x); vueJournal(v); } };
+  q("#j-partage").onclick = async () => {
+    const texte = texteBilan();
+    try { if (navigator.share) { await navigator.share({ title: "Bilan APEX", text: texte }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(texte); alert("Bilan copié : colle-le dans la discussion."); return; } catch (_) {}
+    const t = document.createElement("textarea"); t.value = texte; t.style.cssText = "width:100%;height:240px;margin-top:10px;font-size:12px";
+    q("#j-partage").after(t); t.select();
+  };
   q("#j-exp").onclick = () => {
     const blob = new Blob([JSON.stringify({ version: 1, journal: etat.journal, manuels: etat.manuels, bankroll: etat.bankroll }, null, 1)], { type: "application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "apex-sauvegarde-" + aujourdhui() + ".json"; a.click();
