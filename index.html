@@ -171,7 +171,11 @@ details.replie[open]>summary::after{content:"▴"}
 <script>
 "use strict";
 const M = window.ApexMoteur;
-const P0_JOURS = 21;          // une équipe sans match connu depuis plus de 21 jours bloque la porte P0
+// Porte P0 « données fraîches » (corrigée le 13/10/2026 : l'ancienne règle des 21 jours
+// bloquait tout pendant les trêves internationales, alors que les données étaient complètes).
+const P0_RETARD_EQUIPE = 10;  // l'équipe a plus de 10 jours de retard sur la dernière journée connue de sa ligue
+const P0_TELECHARGEMENT = 7;  // les données n'ont pas été téléchargées depuis plus de 7 jours
+const P0_PAUSE_MAX = 45;      // plus de 45 jours sans aucun match dans la ligue (intersaison, source morte)
 const SEUIL_PAUSE = 0.15;     // pause automatique si drawdown > 15 %
 
 // ------------------------------------------------------------ stockage local (ton téléphone)
@@ -258,11 +262,10 @@ function vueAccueil(v) {
   const ligues = etat.index.ligues.map(l => {
     const retard = jours(l.dernier_match, aujourdhui());
     return `<div class="ligne"><span>${esc(l.ligue)}${l.teste ? "" : ' <span class="doux petit">· non testée</span>'}</span>
-      <span class="mono ${retard > 14 ? "" : "doux"}" style="${retard > 14 ? "color:var(--ambre)" : ""}">jusqu'au ${dateFr(l.dernier_match)}</span></div>`;
+      <span class="mono doux">jusqu'au ${dateFr(l.dernier_match)}</span></div>`;
   }).join("");
-  const testees = etat.index.ligues.filter(l => l.teste);
-  const retardMax = testees.length ? Math.max(...testees.map(l => jours(l.dernier_match, aujourdhui()))) : 0;
-  const alerteRetard = retardMax > 10 ? `<div class="alerte"><span><b>Données en retard de ${retardMax} jours</b> (source football-data.co.uk). Les matchs des équipes sans résultat récent sont écartés (porte P0) : peu de propositions tant que la source n'a pas rattrapé.</span></div>` : "";
+  const tel = (etat.index.genere_le || "").slice(0, 10), age = tel ? jours(tel, aujourdhui()) : 99;
+  const alerteRetard = age > P0_TELECHARGEMENT ? `<div class="alerte"><span><b>Données non mises à jour depuis ${age} jours</b> (dernier export le ${dateFr(tel)}). Lance « Export appli » dans GitHub : en attendant, la porte P0 bloque les verdicts.</span></div>` : "";
   v.innerHTML = `
     ${alerteRetard}
     <button class="bouton" type="button" id="go-sem">Propositions de la semaine</button>
@@ -343,16 +346,23 @@ function vueAnalyser(v) {
   if (etat.analyse && etat.analyse.choix.code === c.code) rendreResultat();
 }
 
+/** Fraîcheur des données d'une équipe pour un match donné : { ok, raison }. */
+function fraicheur(d, code, eq, dateMatch) {
+  let ligue = d.dernier_match;
+  for (const m of etat.manuels) if (m.code === code && m.date > ligue) ligue = m.date;
+  const x = dernierConnu(d, code, eq);
+  if (!x) return { ok: false, raison: `aucun match connu pour ${eq}` };
+  if (jours(x, ligue) > P0_RETARD_EQUIPE) return { ok: false, raison: `${eq} a moins joué que les autres équipes (dernier match connu ${dateFr(x)}) : ajoute ses matchs récents` };
+  const tel = (d.genere_le || "").slice(0, 10);
+  if (!tel || jours(tel, aujourdhui()) > P0_TELECHARGEMENT) return { ok: false, raison: `données non mises à jour depuis le ${dateFr(tel)} : relance l'export` };
+  if (jours(ligue, dateMatch) > P0_PAUSE_MAX) return { ok: false, raison: `aucun match connu dans ce championnat depuis plus de ${P0_PAUSE_MAX} jours` };
+  return { ok: true, raison: "" };
+}
+
 function porteP0(an) {
-  const dernier = (eq) => {
-    let d = an.d.dernier_match_equipe[eq] || null;
-    for (const m of an.manuels) if ((m.dom === eq || m.ext === eq) && (!d || m.date > d)) d = m.date;
-    return d;
-  };
-  const res = [an.choix.dom, an.choix.ext].map(eq => ({ eq, date: dernier(eq) }));
-  const ko = res.filter(r => !r.date || jours(r.date, an.choix.date) > P0_JOURS);
-  return { ok: ko.length === 0, equipes: res,
-           raison: ko.length ? "données de " + ko.map(r => r.eq).join(" et ") + " trop anciennes : ajoute leurs derniers matchs" : "" };
+  const res = [an.choix.dom, an.choix.ext].map(eq => ({ eq, date: dernierConnu(an.d, an.choix.code, eq), f: fraicheur(an.d, an.choix.code, eq, an.choix.date) }));
+  const ko = res.filter(r => !r.f.ok);
+  return { ok: ko.length === 0, equipes: res, raison: [...new Set(ko.map(r => r.f.raison))].join(" ; ") };
 }
 
 function rendreResultat() {
@@ -597,8 +607,8 @@ async function calculerSemaine() {
       examines++;
       const base = { code: l.code, ligue: d.ligue, date: mt.date, heure: mt.heure, dom: mt.dom, ext: mt.ext };
       if (!mt.connu) { ecartes.push({ ...base, raison: "équipe absente des données (promu ?)" }); continue; }
-      const vieux = [mt.dom, mt.ext].filter(eq => { const x = dernierConnu(d, l.code, eq); return !x || jours(x, mt.date) > P0_JOURS; });
-      if (vieux.length) { ecartes.push({ ...base, raison: `P0 : données de ${vieux.join(" et ")} trop anciennes` }); continue; }
+      const ko = [mt.dom, mt.ext].map(eq => fraicheur(d, l.code, eq, mt.date)).filter(f => !f.ok);
+      if (ko.length) { ecartes.push({ ...base, raison: "P0 : " + [...new Set(ko.map(f => f.raison))].join(" ; ") }); continue; }
       const options = propositionsMatch(d, l.code, mt);
       if (!options.length) { ecartes.push({ ...base, raison: "aucune ligne validée entre 60 et 80 %" }); continue; }
       props.push({ ...base, cle: `${l.code}|${mt.date}|${mt.dom}|${mt.ext}`, options,
@@ -787,7 +797,7 @@ function profilEquipe(d, code, eq, dom, jour) {
   const c = (d.classement || {})[eq] || null;
   return {
     eq, code, ligue: d.ligue, rangUefa: d.rang_uefa, nbEquipes: Object.keys(d.classement || {}).length,
-    classement: c, dernier: dernierConnu(d, code, eq),
+    classement: c, dernier: dernierConnu(d, code, eq), fraicheur: fraicheur(d, code, eq, jour),
     att: indice("buts", 0), def: indice("buts", 1), tirs: indice("tirs", 0), cadres: indice("cadres", 0),
     corners: indice("corners", 0), tirsConcedes: indice("tirs", 1),
   };
@@ -809,8 +819,7 @@ function lireContexte(p, ctx, phase) {
   if (ctx.voyage) { s.push(["−", "Long déplacement (plus de 3 h de vol ou décalage horaire)"]); score--; }
   if (ctx.rotation) { s.push(["−", "Gros match de championnat dans les 72 h : rotation probable"]); score--; }
   if (ctx.absent) { s.push(["−", "Absent important"]); score--; }
-  const j = p.dernier ? jours(p.dernier, etat.europe.date) : null;
-  if (j === null || j > P0_JOURS) s.push(["!", `Données trop anciennes (dernier match connu ${dateFr(p.dernier)}) : profil peu fiable`]);
+  if (p.fraicheur && !p.fraicheur.ok) s.push(["!", `Données peu fiables : ${p.fraicheur.raison}`]);
   return { signaux: s, score };
 }
 
